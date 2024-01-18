@@ -465,7 +465,7 @@ class DateTimeField(Field):
             self,
             name: str,
             value: Optional[datetime] = None,
-            format: Optional[str] ="'%Y-%m-%d %H:%M:%S.%f-%z",
+            format: Optional[str] ="%Y-%m-%d %H:%M:%S.%f-%z",
             is_required: Optional[bool] = False) -> None:
         """
         Construct the fields and it's assignment.

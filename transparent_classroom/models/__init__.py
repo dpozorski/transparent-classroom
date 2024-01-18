@@ -1,9 +1,65 @@
 import abc
-from typing import List, Optional
-from datetime import date, datetime
+import datetime
+from typing import List, Optional, Dict, Any, Union
+from transparent_classroom.models.utilities import Formatter
 
 
-class Model(abc.ABC):
+class JSONModel(abc.ABC):
+    """
+    JSON Model Class
+
+    Abstract class providing methods for converting objects to dict and JSON-safe strings.
+
+    Attributes:
+
+
+    """
+
+    def to_dict(self) -> Dict:
+        """
+        Convert the object to a dict.
+
+        :return: Dict
+
+        """
+
+        data = {}
+
+        for key, value in vars(self).items():
+            data[key.lstrip("_")] = value
+
+        return data
+
+    def to_json(self) -> Dict:
+        """
+        Convert the object to JSON-safe dict.
+
+        :return: Dict
+
+        """
+
+        return Formatter.jsonify(data=self.to_dict())
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> Any:
+        """
+        Convert an object from the provided data.
+
+        :param data: Dict, The data to use for object construction.
+        :return: Any
+
+        """
+
+        instance = cls()
+
+        for key, value in data.items():
+            if hasattr(instance, key):
+                setattr(instance, key, value)
+
+        return instance
+
+
+class Model(JSONModel):
     """
     Model Abstract Base Class
 
@@ -12,15 +68,16 @@ class Model(abc.ABC):
 
     """
 
-    def __init__(self, id: int) -> None:
+    def __init__(self, id: Optional[int] = None) -> None:
         """
         Model Constructor
 
-        :param id: int, The id of the Transparent Classroom object.
+        :param id: Optional[int], The id of the Transparent Classroom object.
 
         """
 
         self.id = id
+        super().__init__()
 
     @property
     def id(self) -> int:
@@ -46,6 +103,29 @@ class Model(abc.ABC):
         self._id = value
 
 
+class Auth(JSONModel):
+    """
+    Auth Model Class
+
+    This class represents the response object received from an authentication request to
+    the Transparent Classroom's auth endpoint.
+
+    Attributes:
+
+
+    """
+
+    def __init__(self) -> None:
+        """
+        Auth Model Constructor
+
+        :return: None
+
+        """
+
+        pass
+
+
 class Activity(Model):
     """
     Activity Model Class
@@ -66,16 +146,16 @@ class Activity(Model):
             author_id: Optional[int] = None,
             text: Optional[str] = None,
             html: Optional[str] = None,
-            date: Optional[date] = None,
-            created_at: Optional[datetime] = None) -> None:
+            date: Optional[Union[datetime.date, str]] = None,
+            created_at: Optional[Union[datetime.datetime, str]] = None) -> None:
         """
 
         :param id: Optional[int], The Transparent Classroom object id of the activity.
         :param author_id: Optional[int], The id of the author who created the activity record.
         :param text: Optional[str], The text describing the activity.
         :param html: Optional[str], The HTML-string associated with the activity.
-        :param date: Optional[date], The date the activity occurred upon.
-        :param created_at: Optional[datetime], The datetime/timestamp that the
+        :param date: Optional[Union[date, str]], The date the activity occurred upon.
+        :param created_at: Optional[Union[datetime, str]], The datetime/timestamp that the
             activity was recorded.
         """
 
@@ -156,7 +236,7 @@ class Activity(Model):
         self._html = value
 
     @property
-    def date(self) -> date:
+    def date(self) -> datetime.date:
         """
         The date the activity occurred upon.
 
@@ -167,16 +247,16 @@ class Activity(Model):
         return self._date
 
     @date.setter
-    def date(self, value: date) -> None:
+    def date(self, value: Union[datetime.date, str]) -> None:
         """
         Set the date the activity occurred upon.
 
-        :param value: date, The date the activity occurred upon.
+        :param value: Union[date, str], The date the activity occurred upon.
         :return: None
 
         """
 
-        self._date = value
+        self._date = Formatter.str_to_date(value=value)
 
     @property
     def created_at(self) -> datetime:
@@ -190,16 +270,16 @@ class Activity(Model):
         return self._created_at
 
     @created_at.setter
-    def created_at(self, value: datetime) -> None:
+    def created_at(self, value: Union[datetime.datetime, str]) -> None:
         """
         Set the datetime/timestamp that the activity was recorded.
 
-        :param value: datetime, The datetime/timestamp that the activity was recorded.
+        :param value: Union[datetime, str], The datetime/timestamp that the activity was recorded.
         :return: None
 
         """
 
-        self._created_at = value
+        self._created_at = Formatter.str_to_datetime(value=value)
 
 
 class Child(Model):
@@ -210,7 +290,7 @@ class Child(Model):
         id (`int`): The id of the child in Transparent Classroom.
         first_name (`str`): The child's first name.
         last_name (`str`): The child's last name.
-        birth_date (`datetime.date`): The child's date of birth.
+        birth_date (`date`): The child's date of birth.
         gender (`str`): The child's gender.
         profile_photo (`str`): URL to the child's profile picture.
         program (`str`): The school program that the child belongs to.
@@ -224,9 +304,9 @@ class Child(Model):
             child attends the school/program.
         allergies (`str`): A description of the child's allergies, if any.
         notes (`str`): Notes about the child.
-        first_day (`datetime.date`): The date of the child's first day at
+        first_day (`date`): The date of the child's first day at
             the associated school/program.
-        last_day (`datetime.date`): The date of the child's last day (if
+        last_day (`date`): The date of the child's last day (if
             applicable) that the student attended the school/program.
         exit_notes (`str`): Notes provided by staff/families taken when the
             child/family (if applicable) was leaving the school.
@@ -234,7 +314,7 @@ class Child(Model):
             of why the child/family left the school.
         exit_survey_id (`int`): The id of the exit survey (if the student
             has left the school) form.
-        parent_ids (`int`): List of the child's parent/guardian ids.
+        parent_ids (`List[int]`): List of the child's parent/guardian ids.
         classroom_ids (`List[int]`): List of the classroom  ids that the
             child belongs to at the school.
 
@@ -245,7 +325,7 @@ class Child(Model):
             id: Optional[int] = None,
             first_name: Optional[str] = None,
             last_name: Optional[str] = None,
-            birth_date: Optional[date] = None,
+            birth_date: Optional[Union[datetime.date, str]] = None,
             gender: Optional[str] = None,
             profile_photo: Optional[str] = None,
             program: Optional[str] = None,
@@ -257,8 +337,8 @@ class Child(Model):
             hours_string: Optional[str] = None,
             allergies: Optional[str] = None,
             notes: Optional[str] = None,
-            first_day: Optional[date] = None,
-            last_day: Optional[date] = None,
+            first_day: Optional[Union[datetime.date, str]] = None,
+            last_day: Optional[Union[datetime.date, str]] = None,
             exit_notes: Optional[str] = None,
             exit_reason: Optional[str] = None,
             exit_survey_id: Optional[int] = None,
@@ -267,10 +347,13 @@ class Child(Model):
         """
         Child Object Constructor
 
+        TODO:
+            - Response may include approved_adults_string (optional), emergency_contacts_string (optional)
+
         :param id: Optional[int], The id of the child in Transparent Classroom.
         :param first_name: Optional[str], The child's first name.
         :param last_name: Optional[str], The child's last name.
-        :param birth_date: Optional[date], The child's date of birth.
+        :param birth_date: Optional[Union[date, str]], The child's date of birth.
         :param gender: Optional[str], The child's gender.
         :param profile_photo: Optional[str], URL to the child's profile picture.
         :param program: Optional[str], The school program that the child belongs to.
@@ -284,9 +367,9 @@ class Child(Model):
             child attends the school/program.
         :param allergies: Optional[str], A description of the child's allergies, if any.
         :param notes: Optional[str], Notes about the child.
-        :param first_day: Optional[date], The date of the child's first day at
+        :param first_day: Optional[Union[date, str]], The date of the child's first day at
             the associated school/program.
-        :param last_day: Optional[date], The date of the child's last day (if
+        :param last_day: Optional[Union[date, str]], The date of the child's last day (if
             applicable) that the student attended the school/program.
         :param exit_notes: Optional[str], Notes provided by staff/families taken when the
             child/family (if applicable) was leaving the school.
@@ -371,7 +454,7 @@ class Child(Model):
         self._last_name = value
 
     @property
-    def birth_date(self) -> date:
+    def birth_date(self) -> datetime.date:
         """
         The child's date of birth.
 
@@ -382,16 +465,16 @@ class Child(Model):
         return self._birth_date
 
     @birth_date.setter
-    def birth_date(self, value: date) -> None:
+    def birth_date(self, value: Union[datetime.date, str]) -> None:
         """
         Set the child's date of birth.
 
-        :param value: date, The date of birth of the child.
+        :param value: Union[date, str], The date of birth of the child.
         :return: None
 
         """
 
-        self._birth_date = value
+        self._birth_date = Formatter.str_to_date(value=value)
 
     @property
     def gender(self) -> str:
@@ -647,7 +730,7 @@ class Child(Model):
         self._notes = value
 
     @property
-    def first_day(self) -> date:
+    def first_day(self) -> datetime.date:
         """
         The date of the child's first day at the associated school/program.
 
@@ -658,19 +741,19 @@ class Child(Model):
         return self._first_day
 
     @first_day.setter
-    def first_day(self, value: date) -> None:
+    def first_day(self, value: Union[datetime.date, str]) -> None:
         """
         Set the date of the child's first day at the associated school/program.
 
-        :param value: date, The date of the child's first day at the associated school/program.
+        :param value: Union[date, str], The date of the child's first day at the associated school/program.
         :return: None
 
         """
 
-        self._first_day = value
+        self._first_day = Formatter.str_to_date(value=value)
 
     @property
-    def last_day(self) -> date:
+    def last_day(self) -> datetime.date:
         """
         The date of the child's last day (if applicable) that the student attended the school/program.
 
@@ -681,17 +764,17 @@ class Child(Model):
         return self._last_day
 
     @last_day.setter
-    def last_day(self, value: date) -> None:
+    def last_day(self, value: Union[datetime.date, str]) -> None:
         """
         Set the date of the child's last day (if applicable) that the student attended the school/program.
 
-        :param value: date, The date of the child's last day (if applicable) that the student attended
+        :param value: Union[date, str], The date of the child's last day (if applicable) that the student attended
             the school/program.
         :return: None
 
         """
 
-        self._last_day = value
+        self._last_day = Formatter.str_to_date(value=value)
 
     @property
     def exit_notes(self) -> str:
@@ -1051,7 +1134,7 @@ class Event(Model):
             created_by_id: Optional[int] = None,
             value2: Optional[str] = None,
             created_by_name: Optional[str] = None,
-            time: Optional[datetime] = None) -> None:
+            time: Optional[Union[datetime.datetime, str]] = None) -> None:
         """
         Event Constructor
 
@@ -1063,7 +1146,7 @@ class Event(Model):
         :param created_by_id: Optional[int], The id of the staff member who created the event.
         :param value2: Optional[str], The secondary descriptor of the event.
         :param created_by_name: Optional[str], The name of the staff member who created the event.
-        :param time: Optional[datetime], The datetime that the event was created.
+        :param time: Optional[Union[datetime, str]], The datetime that the event was created.
         :return: None
 
         """
@@ -1251,16 +1334,16 @@ class Event(Model):
         return self._time
 
     @time.setter
-    def time(self, value: datetime) -> None:
+    def time(self, value: Union[datetime.datetime, str]) -> None:
         """
         Set the datetime that the event was created.
 
-        :param value: datetime, The datetime that the event was created.
+        :param value: Union[datetime, str], The datetime that the event was created.
         :return: None
 
         """
 
-        self._time = value
+        self._time = Formatter.str_to_datetime(value=value)
 
 
 class Form(Model):
@@ -1294,7 +1377,7 @@ class Form(Model):
             classroom: Optional[str] = None,
             release: Optional[str] = None,
             signature: Optional[str] = None,
-            created_at: Optional[datetime] = None) -> None:
+            created_at: Optional[Union[datetime.datetime, str]] = None) -> None:
         """
         Form Constructor
 
@@ -1308,7 +1391,7 @@ class Form(Model):
         :param classroom: Optional[str], The name of the classroom to which the form has been submitted.
         :param release: Optional[str], Permission/release agreement to take/use photos, etc. of the student.
         :param signature: Optional[str], The parent's signature validating the form.
-        :param created_at: Optional[datetime], The datetime of when the form was created.
+        :param created_at: Optional[Union[datetime, str]], The datetime of when the form was created.
         :return: None
 
         """
@@ -1544,16 +1627,16 @@ class Form(Model):
         return self._created_at
 
     @created_at.setter
-    def created_at(self, value: datetime) -> None:
+    def created_at(self, value: Union[datetime.datetime, str]) -> None:
         """
         Set the datetime of when the form was created.
 
-        :param value: datetime, The datetime of when the form was created.
+        :param value: Union[datetime, str], The datetime of when the form was created.
         :return: None
 
         """
 
-        self._created_at = value
+        self._created_at = Formatter.str_to_datetime(value=value)
 
 
 class FormTemplate(Model):
@@ -1726,7 +1809,7 @@ class Level(Model):
             child_id: Optional[int] = None,
             lesson_id: Optional[int] = None,
             proficiency: Optional[int] = None,
-            date: Optional[date] = None,
+            date: Optional[Union[datetime.date, str]] = None,
             planned: Optional[bool] = None) -> None:
         """
         Level Constructor
@@ -1735,7 +1818,7 @@ class Level(Model):
         :param child_id: Optional[int], The id of the child associated with this lesson's proficiency level.
         :param lesson_id: Optional[int], The id of the lesson given to the child for the level assessment.
         :param proficiency: Optional[int], The proficiency score assessed to the student on the lesson.
-        :param date: Optional[date], The date the lesson was given and the level assessment was made.
+        :param date: Optional[Union[date, str]], The date the lesson was given and the level assessment was made.
         :param planned: Optional[bool], Flag indicating whether the lesson/assessment was planned.
         :return: None
 
@@ -1818,7 +1901,7 @@ class Level(Model):
         self._proficiency = value
 
     @property
-    def date(self) -> date:
+    def date(self) -> datetime.date:
         """
         The date the lesson was given and the level assessment was made.
 
@@ -1829,16 +1912,16 @@ class Level(Model):
         return self._date
 
     @date.setter
-    def date(self, value: date) -> None:
+    def date(self, value: Union[datetime.date, str]) -> None:
         """
         Set the date the lesson was given and the level assessment was made.
 
-        :param value: date, The date the lesson was given and the level assessment was made.
+        :param value: Union[date, str], The date the lesson was given and the level assessment was made.
         :return: None
 
         """
 
-        self._date = value
+        self._date = Formatter.str_to_date(value=value)
 
     @property
     def planned(self) -> bool:
@@ -1890,7 +1973,7 @@ class OnlineApplication(Model):
             program: Optional[str] = None,
             child_first_name: Optional[str] = None,
             child_last_name: Optional[str] = None,
-            child_birth_date: Optional[date] = None,
+            child_birth_date: Optional[Union[datetime.date, str]] = None,
             child_gender: Optional[str] = None,
             mother_email: Optional[str] = None,
             session_id: Optional[int] = None) -> None:
@@ -1903,7 +1986,7 @@ class OnlineApplication(Model):
         :param program: Optional[str], The program at the school that the child/family is applying to.
         :param child_first_name: Optional[str], The applicant child's first name.
         :param child_last_name: Optional[str], The applicant child's last name.
-        :param child_birth_date: Optional[date], The applicant child's birthdate.
+        :param child_birth_date: Optional[Union[date, str]], The applicant child's birthdate.
         :param child_gender: Optional[str], The applicant child's gender.
         :param mother_email: Optional[str], The mother of the applicant child's email address.
         :param session_id: Optional[int], The session that the child/family is applying to.
@@ -2038,7 +2121,7 @@ class OnlineApplication(Model):
         self._child_last_name = value
 
     @property
-    def child_birth_date(self) -> date:
+    def child_birth_date(self) -> datetime.date:
         """
         The applicant child's birthdate.
 
@@ -2049,16 +2132,16 @@ class OnlineApplication(Model):
         return self._child_birth_date
 
     @child_birth_date.setter
-    def child_birth_date(self, value: date) -> None:
+    def child_birth_date(self, value: Union[datetime.date, str]) -> None:
         """
         Set the applicant child's birthdate.
 
-        :param value: date, The applicant child's birthdate.
+        :param value: Union[date, str], The applicant child's birthdate.
         :return: None
 
         """
 
-        self._child_birth_date = value
+        self._child_birth_date = Formatter.str_to_date(value=value)
 
     @property
     def child_gender(self) -> str:
@@ -2307,8 +2390,8 @@ class Session(Model):
             self,
             id: Optional[int] = None,
             name: Optional[str] = None,
-            start_date: Optional[date] = None,
-            stop_date: Optional[date] = None,
+            start_date: Optional[Union[datetime.date, str]] = None,
+            stop_date: Optional[Union[datetime.date, str]] = None,
             children: Optional[int] = None,
             current: Optional[bool] = None,
             inactive: Optional[bool] = None) -> None:
@@ -2317,8 +2400,8 @@ class Session(Model):
 
         :param id: Optional[int], The Transparent Classroom object id of the session.
         :param name: Optional[str], The name of the instruction session.
-        :param start_date: Optional[date], The start date of the session of instruction.
-        :param stop_date: Optional[date], The stop date of the session of instruction.
+        :param start_date: Optional[Union[date, str]], The start date of the session of instruction.
+        :param stop_date: Optional[Union[date, str]], The stop date of the session of instruction.
         :param children: Optional[int], The number of children enrolled during the session.
         :param current: Optional[bool], Flag indicating whether it is the current session.
         :param inactive: Optional[bool], Flag indicating whether the session is inactive.
@@ -2358,7 +2441,7 @@ class Session(Model):
         self._name = value
 
     @property
-    def start_date(self) -> date:
+    def start_date(self) -> datetime.date:
         """
         The start date of the session of instruction.
 
@@ -2369,19 +2452,19 @@ class Session(Model):
         return self._start_date
 
     @start_date.setter
-    def start_date(self, value: date) -> None:
+    def start_date(self, value: Union[datetime.date, str]) -> None:
         """
         Set the start date of the session of instruction.
 
-        :param value: date, The start date of the session of instruction.
+        :param value: Union[date, str], The start date of the session of instruction.
         :return: None
 
         """
 
-        self._start_date = value
+        self._start_date = Formatter.str_to_date(value=value)
 
     @property
-    def stop_date(self) -> date:
+    def stop_date(self) -> datetime.date:
         """
         The end date of the session of instruction.
 
@@ -2392,16 +2475,16 @@ class Session(Model):
         return self._stop_date
 
     @stop_date.setter
-    def stop_date(self, value: date) -> None:
+    def stop_date(self, value: Union[datetime.date, str]) -> None:
         """
         Set the end date of the session of instruction.
 
-        :param value: date, The end date of the session of instruction.
+        :param value: Union[date, str], The end date of the session of instruction.
         :return: None
 
         """
 
-        self._stop_date = value
+        self._stop_date = Formatter.str_to_date(value=value)
 
     @property
     def children(self) -> int:
