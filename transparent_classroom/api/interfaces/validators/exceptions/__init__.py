@@ -142,29 +142,6 @@ class NotGreaterThanValueError(ConstraintException):
         super().__init__(f"Field value `{value}` is not greater than the minimum value `{min_value}`")
 
 
-class RequiredValueError(ConstraintException):
-    """
-    Required Value Error Class
-
-    This exception should be thrown when no value is provided to a required
-    field.
-
-    Attributes:
-
-
-    """
-
-    def __init__(self) -> None:
-        """
-        Required Value Error Constructor
-
-        :return: None
-
-        """
-
-        super().__init__(f"Field must be set. None provided")
-
-
 class StringValueError(TypeConstraintException):
     """
     String Value Error Class

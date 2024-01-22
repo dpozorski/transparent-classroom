@@ -22,7 +22,7 @@ class ModelType(Enum):
     The model used for user authentication.
     
     """
-    AUTHENTICATION = "authenticate"
+    AUTHENTICATE = "authenticate"
 
     """
     The model used to record attributes about the children/learners at the school.
@@ -149,3 +149,84 @@ class EndpointBehavior(Enum):
 
     """
     UPDATE = "UPDATE"
+
+
+class HTTPMethod(Enum):
+    """
+    HTTP Method Enum Class
+
+    Enum containing the various valid HTTP methods.
+
+    Attributes:
+
+
+    """
+
+    """
+    The HTTP CONNECT method starts two-way communications with the requested resource.
+    
+    """
+    CONNECT = "CONNECT"
+
+    """
+    The DELETE method requests that the origin server remove the association between the target 
+    resource and its current functionality. . i.e. HTTP DELETE method deletes the specified resource 
+    at the origin of server.
+    
+    """
+    DELETE = "DELETE"
+
+    """
+    The GET method means retrieve whatever information (in the form of an entity) is identified by the 
+    Request-URI.
+    
+    """
+    GET = "GET"
+
+    """
+    The HTTP HEAD method requests the headers that would be returned if the HEAD request's URL was 
+    instead requested with the HTTP GET method. For example, if a URL might produce a large download, 
+    a HEAD request could read its Content-Length header to check the filesize without actually 
+    downloading the file.
+    
+    """
+    HEAD = "HEAD"
+
+    """
+    The OPTIONS method represents a request for information about the communication options available 
+    on the request/response chain identified by the Request-URI.
+    
+    """
+    OPTIONS = "OPTIONS"
+
+    """
+    In computing, the PATCH method is a request method in HTTP for making partial changes to an existing 
+    resource. The PATCH method provides an entity containing a list of changes to be applied to the 
+    resource requested using the HTTP Uniform Resource Identifier (URI).
+    
+    """
+    PATCH = "PATCH"
+
+    """
+    The POST request method requests that a web server accept the data enclosed in the body of the request 
+    message, most likely for storing it.[1] It is often used when uploading a file or when submitting a 
+    completed web form.
+    
+    """
+    POST = "POST"
+
+    """
+    The HTTP PUT method is used to create a new resource or replace a resource. It's similar to the POST 
+    method, in that it sends data to a server, but it's idempotent. This means that the effect of multiple 
+    PUT requests should be the same as one PUT request.
+    
+    """
+    PUT = "PUT"
+
+    """
+    TRACE allows the client to see what is being received at the other end of the request chain and use 
+    that data for testing or diagnostic information. The value of the Via header field (section 14.45) 
+    is of particular interest, since it acts as a trace of the request chain.
+    
+    """
+    TRACE = "TRACE"

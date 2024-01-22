@@ -1,7 +1,7 @@
+from transparent_classroom.api.enums import HTTPMethod
 from transparent_classroom.api.interfaces import fields
 from transparent_classroom.api.interfaces import Interface
 from transparent_classroom.api.enums import EndpointBehavior
-from transparent_classroom.api.interfaces.methods import HTTPMethod
 
 
 # Headers used for authentication and scoping

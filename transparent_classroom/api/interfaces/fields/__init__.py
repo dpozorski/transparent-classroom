@@ -173,6 +173,17 @@ class Field(NamedAPIAttribute):
 
         return hash(str(self))
 
+    def is_valid(self, strict: bool = False) -> bool:
+        """
+        Return whether the field assignment is valid.
+
+        :param strict: bool, Flag indicating whether to perform strict validation.
+        :return: bool
+
+        """
+
+        return self.validator.is_valid(value=self.value, strict=strict)
+
     @property
     def name(self) -> str:
         """

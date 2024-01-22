@@ -2,8 +2,8 @@ import requests
 from datetime import date, datetime
 from transparent_classroom import apis
 from typing import Optional, List, Dict
+from transparent_classroom.api.enums import HTTPMethod
 from transparent_classroom.api.entry_points import EntryPoint
-from transparent_classroom.api.interfaces.methods import HTTPMethod
 from transparent_classroom.api.enums import ModelType, EndpointBehavior
 
 
@@ -122,7 +122,7 @@ class Client(object):
 
         """
 
-        if (self.token is None) and (model_type is not ModelType.AUTHENTICATION):
+        if (self.token is None) and (model_type is not ModelType.AUTHENTICATE):
             self.authenticate()
 
         entry_point = self.__api.route(model_type=model_type, behavior=behavior)
@@ -141,7 +141,7 @@ class Client(object):
         """
 
         response = self.__submit(**{
-            "model_type": ModelType.AUTHENTICATION,
+            "model_type": ModelType.AUTHENTICATE,
             "behavior": EndpointBehavior.SHOW,
             "parameters": {
                 "email": self.email,
