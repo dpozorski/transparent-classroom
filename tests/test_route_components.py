@@ -3,7 +3,7 @@ import unittest
 from transparent_classroom.api.routing.routes import RouteComponent
 
 
-class TestRouteComponents(unittest.TestCase):
+class TestRouteComponent(unittest.TestCase):
     """
     Test Route Components Class
 

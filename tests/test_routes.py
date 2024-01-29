@@ -3,7 +3,7 @@ from transparent_classroom.api.enums import ModelType
 from transparent_classroom.api.routing.routes import RouteComponent, Route
 
 
-class TestRoutes(unittest.TestCase):
+class TestRoute(unittest.TestCase):
     """
     Test Routes Class
 

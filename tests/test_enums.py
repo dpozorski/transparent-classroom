@@ -4,7 +4,7 @@ from typing import Type
 from transparent_classroom.api import enums
 
 
-class TestEnumerations(unittest.TestCase):
+class TestEnumeration(unittest.TestCase):
     """
     Test Enumerations Class
 

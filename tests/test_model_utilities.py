@@ -149,3 +149,7 @@ class TestFormatter(unittest.TestCase):
         self.assertEqual(dt, self.formatter.str_to_datetime(value=dts))
         self.assertEqual(dt, self.formatter.str_to_datetime(value=dt))
         self.assertRaises(ValueError, self.formatter.str_to_datetime, {"value": "Hello, World."})
+
+
+if __name__ == '__main__':
+    unittest.main()

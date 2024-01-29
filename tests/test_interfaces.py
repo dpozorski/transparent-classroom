@@ -5,7 +5,7 @@ from transparent_classroom.api.enums import HTTPMethod, EndpointBehavior
 from transparent_classroom.api.interfaces.fields.exceptions import InterfaceValidationError
 
 
-class TestInterfaces(unittest.TestCase):
+class TestInterface(unittest.TestCase):
     """
     Test Interface Class
 

@@ -2,7 +2,7 @@ import unittest
 from transparent_classroom.api.interfaces.validators import Validator, constraints, exceptions
 
 
-class TestValidators(unittest.TestCase):
+class TestValidator(unittest.TestCase):
     """
     Test Validators Class
 

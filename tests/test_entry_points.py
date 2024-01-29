@@ -6,9 +6,9 @@ from transparent_classroom.api.enums import HTTPMethod, EndpointBehavior
 from transparent_classroom.api.routing.routes import RouteComponent, Route
 
 
-class TestEntryPoints(unittest.TestCase):
+class TestEntryPoint(unittest.TestCase):
     """
-    Test Entry Points Class
+    Test Entry Point Class
 
     Test class for validating the expected behavior of the entry point model.
 

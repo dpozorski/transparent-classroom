@@ -7,7 +7,7 @@ from transparent_classroom.api.interfaces.validators import constraints, excepti
 from transparent_classroom.api.interfaces.fields.exceptions import InterfaceValidationError
 
 
-class TestAttributes(unittest.TestCase):
+class TestAttribute(unittest.TestCase):
     """
     Test Attributes Class
 
@@ -84,7 +84,7 @@ class TestAttributes(unittest.TestCase):
         self.assertNotEqual(self.attribute1.name, self.attribute3.name)
 
 
-class TestFields(unittest.TestCase):
+class TestField(unittest.TestCase):
     """
     Test Fields Class
 
@@ -223,7 +223,7 @@ class TestFields(unittest.TestCase):
         self.assertRaises(exceptions.NullFieldException, self.field1.is_valid, **{"strict": True})
 
 
-class TestSpecializedFields(unittest.TestCase):
+class TestSpecializedField(unittest.TestCase):
     """
     Test Specialized Fields Class
 
@@ -396,7 +396,7 @@ class TestSpecializedFields(unittest.TestCase):
         self._test_invalid_entries(field=field, values=invalid_values)
 
 
-class TestInterfaceFields(unittest.TestCase):
+class TestInterfaceField(unittest.TestCase):
     """
     Test Interface Fields Class
 
@@ -461,7 +461,7 @@ class TestInterfaceFields(unittest.TestCase):
         self.assertRaises(exceptions.NotGreaterThanValueError, self.interface_field.bind, **{"value": 0})
 
 
-class TestFieldSets(unittest.TestCase):
+class TestFieldSet(unittest.TestCase):
     """
     Test Field Sets Class
 
@@ -658,7 +658,7 @@ class TestFieldSets(unittest.TestCase):
             self.assertEqual(field, self.field_set.get(name=field.name))
 
 
-class TestInterfaceFieldSets(unittest.TestCase):
+class TestInterfaceFieldSet(unittest.TestCase):
     """
     Test Interface Field Sets Class
 
