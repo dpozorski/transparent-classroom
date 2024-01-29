@@ -24,7 +24,7 @@ class ConstraintException(ValueError):
         super().__init__(message)
 
 
-class TypeConstraintException(ValueError):
+class TypeConstraintException(ConstraintException):
     """
     Generic Type Constraint Exception Class
 

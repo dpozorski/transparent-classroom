@@ -1,4 +1,3 @@
-import copy
 from typing import List, Union, Dict
 from transparent_classroom.api.enums import ModelType
 
@@ -22,6 +21,16 @@ class RouteComponent(object):
         """
 
         self.sub_path = sub_path
+
+    def __copy__(self) -> 'RouteComponent':
+        """
+        Copy the Route Component
+
+        :return: RouteComponent
+
+        """
+
+        return RouteComponent(sub_path=self.sub_path)
 
     def __eq__(self, other: 'RouteComponent') -> bool:
         """
@@ -105,7 +114,7 @@ class Route(object):
         """
 
         if (other is not None) and isinstance(other, Route):
-            return self.path == other.path
+            return (self.path == other.path) and (self.model_type == other.model_type)
 
         return False
 
@@ -203,7 +212,7 @@ class Route(object):
 
         """
 
-        return [copy.copy(component) for component in self._components]
+        return [component.__copy__() for component in self._components]
 
     @property
     def suffix(self) -> str:

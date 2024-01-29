@@ -30,6 +30,19 @@ class Constraint(abc.ABC):
 
         self.nullable = nullable
 
+    @abc.abstractmethod
+    def __copy__(self) -> 'Constraint':
+        """
+        Copy and return the constraint object.
+
+        :return: Constraint
+
+        :raises: NotImplementedError
+
+        """
+
+        raise NotImplementedError()
+
     def __eq__(self, other: 'Constraint') -> bool:
         """
         Evaluate whether the two constraints are equal.
@@ -148,6 +161,16 @@ class IsType(Constraint):
         self.data_type = data_type
         self.exception_type = exception_type
 
+    def __copy__(self) -> 'IsType':
+        """
+        Copy the IsType Constraint
+
+        :return: IsType
+
+        """
+
+        return IsType(data_type=self.data_type, exception_type=self.exception_type, nullable=self.nullable)
+
     def _is_valid(self, value: Any, strict: Optional[bool] = False) -> bool:
         """
         Return whether the provided value is the constrained type.
@@ -243,6 +266,16 @@ class IsNumeric(IsType):
             nullable=nullable
         )
 
+    def __copy__(self) -> 'IsNumeric':
+        """
+        Copy the Is Numeric Constraint
+
+        :return: IsNumeric
+
+        """
+
+        return IsNumeric(nullable=self.nullable)
+
     def _is_valid(self, value: Any, strict: Optional[bool] = False) -> bool:
         """
         Return whether the provided value is the constrained type.
@@ -292,6 +325,16 @@ class IsInteger(IsNumeric):
         self.data_type = int
         self.exception_type = exceptions.IntegerValueError
 
+    def __copy__(self) -> 'IsInteger':
+        """
+        Copy the Is Integer Constraint
+
+        :return: IsInteger
+
+        """
+
+        return IsInteger(nullable=self.nullable)
+
     def _is_valid(self, value: Any, strict: Optional[bool] = False) -> bool:
         """
         Return whether the provided value is the constrained type.
@@ -336,6 +379,16 @@ class IsGreaterThan(IsNumeric):
 
         self.min_value = min_value
         super().__init__(nullable=nullable)
+
+    def __copy__(self) -> 'IsGreaterThan':
+        """
+        Copy the Is Greater Than Constraint
+
+        :return: IsGreaterThan
+
+        """
+
+        return IsGreaterThan(min_value=self.min_value, nullable=self.nullable)
 
     def __hash__(self) -> int:
         """
@@ -414,6 +467,16 @@ class IsPositiveInteger(IsGreaterThan, IsInteger):
         IsGreaterThan.__init__(self, min_value=0, nullable=nullable)
         IsInteger.__init__(self, nullable=nullable)
 
+    def __copy__(self) -> 'IsPositiveInteger':
+        """
+        Copy the Is Positive Integer Constraint
+
+        :return: IsPositiveInteger
+
+        """
+
+        return IsPositiveInteger(nullable=self.nullable)
+
     def __hash__(self) -> int:
         """
         Hash the constraint.
@@ -467,6 +530,16 @@ class IsBoolean(IsType):
             nullable=nullable
         )
 
+    def __copy__(self) -> 'IsBoolean':
+        """
+        Copy the Is Boolean Constraint
+
+        :return: IsBoolean
+
+        """
+
+        return IsBoolean(nullable=self.nullable)
+
 
 class IsRequired(Constraint):
     """
@@ -488,6 +561,16 @@ class IsRequired(Constraint):
         """
 
         super().__init__(nullable=False)
+
+    def __copy__(self) -> 'IsRequired':
+        """
+        Copy the Is Required Constraint
+
+        :return: IsRequired
+
+        """
+
+        return IsRequired()
 
     def _is_valid(self, value: Any, strict: Optional[bool] = False) -> bool:
         """
@@ -531,6 +614,16 @@ class IsString(IsType):
             nullable=nullable
         )
 
+    def __copy__(self) -> 'IsString':
+        """
+        Copy the Is String Constraint
+
+        :return: IsString
+
+        """
+
+        return IsString(nullable=self.nullable)
+
 
 class IsDate(IsType):
     """
@@ -559,6 +652,16 @@ class IsDate(IsType):
             exception_type=exceptions.DateValueError,
             nullable=nullable
         )
+
+    def __copy__(self) -> 'IsDate':
+        """
+        Copy the Is Date Constraint
+
+        :return: IsDate
+
+        """
+
+        return IsDate(nullable=self.nullable)
 
     def _is_valid(self, value: Any, strict: Optional[bool] = False) -> bool:
         """
@@ -611,6 +714,16 @@ class IsDateTime(IsType):
             nullable=nullable
         )
 
+    def __copy__(self) -> 'IsDateTime':
+        """
+        Copy the Is DateTime Constraint
+
+        :return: IsDateTime
+
+        """
+
+        return IsDateTime(nullable=self.nullable)
+
 
 class SelectionConstraint(Constraint):
     """
@@ -638,6 +751,16 @@ class SelectionConstraint(Constraint):
 
         super().__init__(nullable=nullable)
         self.options = options
+
+    def __copy__(self) -> 'SelectionConstraint':
+        """
+        Copy the Selection Constraint
+
+        :return: SelectionConstraint
+
+        """
+
+        return SelectionConstraint(options=self.options, nullable=self.nullable)
 
     def __eq__(self, other: 'Constraint') -> bool:
         """
@@ -684,9 +807,14 @@ class SelectionConstraint(Constraint):
             is_valid = item in self.options
 
             if is_valid:
-                item_index = self.options.index(item)
-                is_valid = isinstance(item, type(self.options[item_index])) \
-                    and isinstance(self.options[item_index], type(item))
+                item_indices = [i for i in range(len(self.options)) if self.options[i] == item]
+                is_valid = False
+
+                for item_index in item_indices:
+                    if (isinstance(item, type(self.options[item_index])) and
+                            isinstance(self.options[item_index], type(item))):
+                        is_valid = True
+                        break
 
             if not is_valid:
                 if strict:
@@ -763,3 +891,13 @@ class IsList(IsType):
             exception_type=exceptions.ListValueError,
             nullable=nullable
         )
+
+    def __copy__(self) -> 'IsList':
+        """
+        Copy the Is List Constraint
+
+        :return: IsList
+
+        """
+
+        return IsList(nullable=self.nullable)

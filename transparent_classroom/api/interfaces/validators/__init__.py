@@ -29,9 +29,9 @@ class Validator(object):
 
         """
 
+        self._is_required = is_required
         self._constraints = []
         self.add(constraints=constraints)
-        self.is_required = is_required
 
     def __eq__(self, other: Any) -> bool:
         """
@@ -77,6 +77,21 @@ class Validator(object):
         """
 
         return len(self._constraints)
+
+    def __copy__(self) -> 'Validator':
+        """
+        Copy the Validator
+
+        :return: Validator
+
+        """
+
+        constraints = []
+
+        for constraint in self._constraints:
+            constraints.append(constraint.__copy__())
+
+        return Validator(constraints=constraints, is_required=self.is_required)
 
     def add(self, constraints: Union[Constraint, List[Constraint]]) -> None:
         """

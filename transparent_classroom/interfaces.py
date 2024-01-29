@@ -50,7 +50,7 @@ LIST_CHILDREN_INTERFACE = Interface(
     parameters=[
         fields.InterfaceField(base=fields.ModelIdField(name="classroom_id")),
         fields.InterfaceField(base=fields.ModelIdField(name="session_id")),
-        fields.InterfaceField(base=fields.BooleanField(name="only_current")),
+        fields.InterfaceField(base=fields.BooleanField(name="only_current"))
     ] + _PAGING_PARAMETERS
 )
 GET_CHILD_INTERFACE = Interface(
