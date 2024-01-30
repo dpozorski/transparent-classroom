@@ -36,20 +36,20 @@ class Deserializer(Generic[_J]):
 
         return self._cls.from_dict(data=data)
 
-    def batch(self, objs: Union[Dict, List[Dict]]) -> List[_J]:
+    def batch(self, data: Union[Dict, List[Dict]]) -> List[_J]:
         """
         Batch deserialize the objects.
 
-        :param objs: Union[Dict, List[Dict]], The object to deserialize.
+        :param data: Union[Dict, List[Dict]], The object to deserialize.
         :return: List[_J]
 
         """
 
         deserialized_objects = []
-        objs = objs if isinstance(objs, list) else [objs]
+        data = data if isinstance(data, list) else [data]
 
-        for data in objs:
-            deserialized_objects.append(self.deserialize(data=data))
+        for obj_data in data:
+            deserialized_objects.append(self.deserialize(data=obj_data))
 
         return deserialized_objects
 

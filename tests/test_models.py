@@ -16,18 +16,18 @@ class TestJSONModel(unittest.TestCase):
     """
 
     """
+    The model type to test.
+    
+    """
+    cls = models.Model
+
+    """
     Data used for object initialization.
 
     """
     data = {
         "id": 1
     }
-
-    """
-    The model type to test.
-    
-    """
-    cls = models.Model
 
     def test_from_dict(self) -> None:
         """
