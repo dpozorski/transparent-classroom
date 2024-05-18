@@ -1,6 +1,6 @@
 from typing import List, Union, Optional, Dict
+from transparent_classroom.api.enums import HTTPMethod
 from transparent_classroom.api.enums import EndpointBehavior
-from transparent_classroom.api.interfaces.methods import HTTPMethod
 from transparent_classroom.api.interfaces.fields import InterfaceField, InterfaceFieldSet
 
 

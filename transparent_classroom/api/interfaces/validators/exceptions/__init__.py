@@ -24,7 +24,7 @@ class ConstraintException(ValueError):
         super().__init__(message)
 
 
-class TypeConstraintException(ValueError):
+class TypeConstraintException(ConstraintException):
     """
     Generic Type Constraint Exception Class
 
@@ -142,29 +142,6 @@ class NotGreaterThanValueError(ConstraintException):
         super().__init__(f"Field value `{value}` is not greater than the minimum value `{min_value}`")
 
 
-class RequiredValueError(ConstraintException):
-    """
-    Required Value Error Class
-
-    This exception should be thrown when no value is provided to a required
-    field.
-
-    Attributes:
-
-
-    """
-
-    def __init__(self) -> None:
-        """
-        Required Value Error Constructor
-
-        :return: None
-
-        """
-
-        super().__init__(f"Field must be set. None provided")
-
-
 class StringValueError(TypeConstraintException):
     """
     String Value Error Class
@@ -187,30 +164,6 @@ class StringValueError(TypeConstraintException):
         """
 
         super().__init__(value=value, data_type=str)
-
-
-class BooleanValueError(TypeConstraintException):
-    """
-    Boolean Value Error Class
-
-    This exception should be thrown when a value is provided to a required
-    field that is not boolean (as expected).
-
-    Attributes:
-
-
-    """
-
-    def __init__(self, value: Any) -> None:
-        """
-        Non-Boolean Constraint Value Error Constructor
-
-        :param value: Any, The value that failed validation.
-        :return: None
-
-        """
-
-        super().__init__(value=value, data_type=bool)
 
 
 class DateValueError(TypeConstraintException):
