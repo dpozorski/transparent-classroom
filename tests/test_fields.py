@@ -326,7 +326,7 @@ class TestSpecializedField(unittest.TestCase):
 
         """
 
-        valid_values = [True, False, None]
+        valid_values = ["true", "false", None]
         invalid_values = [1, 0, -5, 3.3, None, 500, [], {}, datetime.today().date(), datetime.now()]
         field = fields.BooleanField(name="test_bool")
         self._test_valid_entries(field=field, values=valid_values)

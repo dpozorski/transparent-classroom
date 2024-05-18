@@ -34,7 +34,7 @@ class TestFormatter(unittest.TestCase):
         """
 
         d, dt = date.today(), datetime.now(pytz.utc)
-        ds, dts = date.strftime(d, "%Y-%m-%d"), datetime.strftime(dt, "%Y-%m-%d %H:%M:%S.%f-%z")
+        ds, dts = date.strftime(d, "%Y-%m-%d"), datetime.strftime(dt, "%Y-%m-%dT%H:%M:%S.%f%z")
         data = {
             "property_1": "Hello, World!",
             "property_2": d,
@@ -115,7 +115,7 @@ class TestFormatter(unittest.TestCase):
         """
 
         dt = datetime.now(pytz.utc)
-        dts = datetime.strftime(dt, "%Y-%m-%d %H:%M:%S.%f-%z")
+        dts = datetime.strftime(dt, "%Y-%m-%dT%H:%M:%S.%f%z")
         self.assertEqual(dts, self.formatter.datetime_to_str(value=dt))
         self.assertEqual(dts, self.formatter.datetime_to_str(value=dts))
         self.assertRaises(ValueError, self.formatter.datetime_to_str, {"value": "Hello, World."})
@@ -145,7 +145,7 @@ class TestFormatter(unittest.TestCase):
         """
 
         dt = datetime.now(pytz.utc)
-        dts = datetime.strftime(dt, "%Y-%m-%d %H:%M:%S.%f-%z")
+        dts = datetime.strftime(dt, "%Y-%m-%dT%H:%M:%S.%f%z")
         self.assertEqual(dt, self.formatter.str_to_datetime(value=dts))
         self.assertEqual(dt, self.formatter.str_to_datetime(value=dt))
         self.assertRaises(ValueError, self.formatter.str_to_datetime, {"value": "Hello, World."})

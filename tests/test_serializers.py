@@ -2,7 +2,8 @@ import operator
 import unittest
 from datetime import date
 from functools import reduce
-from transparent_classroom.models import serializers, Child, OnlineApplication, Model
+from transparent_classroom.models import Child, OnlineApplication, Model
+from transparent_classroom.models import serializers, deserializers
 
 
 class TestSerializer(unittest.TestCase):
@@ -105,7 +106,7 @@ class TestChildSerializer(TestSerializer):
             dominant_language="English",
             grade="2nd",
             student_id="1",
-            hours_string="8:00AM - 3:00PM",
+            hours_string="8:00AM(8:15AM) - 3:00PM M-F",
             allergies=None,
             notes="Hello World",
             first_day=date.today(),
@@ -138,17 +139,30 @@ class TestOnlineApplicationSerializer(TestSerializer):
 
         """
 
+        fields = []
+        field_data = {
+            "program": "Elementary",
+            "child_first_name": "Hello",
+            "child_last_name": "World",
+            "child_birth_date": date.today(),
+            "child_gender": "F",
+            "mother_email": "hello@world.com",
+            "session_id": 1
+        }
+
+        for name in field_data.keys():
+            fields.append({
+                'name': name,
+                'value': field_data[name]
+            })
+
+        widgets = deserializers.WidgetDeserializer().batch(data=fields)
         self.model = OnlineApplication(
             id=1,
             school_id=1,
+            type="form",
             state="Accepted",
-            program="Elementary",
-            child_first_name="Hello",
-            child_last_name="World",
-            child_birth_date=date.today(),
-            child_gender="F",
-            mother_email="hello@world.com",
-            session_id=1
+            fields=widgets
         )
         self.serializer = serializers.OnlineApplicationSerializer()
 

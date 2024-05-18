@@ -166,30 +166,6 @@ class StringValueError(TypeConstraintException):
         super().__init__(value=value, data_type=str)
 
 
-class BooleanValueError(TypeConstraintException):
-    """
-    Boolean Value Error Class
-
-    This exception should be thrown when a value is provided to a required
-    field that is not boolean (as expected).
-
-    Attributes:
-
-
-    """
-
-    def __init__(self, value: Any) -> None:
-        """
-        Non-Boolean Constraint Value Error Constructor
-
-        :param value: Any, The value that failed validation.
-        :return: None
-
-        """
-
-        super().__init__(value=value, data_type=bool)
-
-
 class DateValueError(TypeConstraintException):
     """
     Date Value Error Class

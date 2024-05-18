@@ -7,8 +7,8 @@ from transparent_classroom.api.enums import EndpointBehavior
 # Headers used for authentication and scoping
 _AUTH_HEADERS = [
     fields.InterfaceField(base=fields.StringField(name="X-TransparentClassroomToken", is_required=True)),
-    fields.InterfaceField(base=fields.ModelIdField(name="X-TransparentClassroomMasqueradeId")),
-    fields.InterfaceField(base=fields.ModelIdField(name="X-TransparentClassroomSchoolId"))
+    fields.InterfaceField(base=fields.StringField(name="X-TransparentClassroomMasqueradeId")),
+    fields.InterfaceField(base=fields.StringField(name="X-TransparentClassroomSchoolId"))
 ]
 
 # Parameters for pagination and page list limits
@@ -51,7 +51,7 @@ LIST_CHILDREN_INTERFACE = Interface(
         fields.InterfaceField(base=fields.ModelIdField(name="classroom_id")),
         fields.InterfaceField(base=fields.ModelIdField(name="session_id")),
         fields.InterfaceField(base=fields.BooleanField(name="only_current"))
-    ] + _PAGING_PARAMETERS
+    ]
 )
 GET_CHILD_INTERFACE = Interface(
     method=HTTPMethod.GET,
@@ -96,7 +96,7 @@ LIST_CLASSROOMS_INTERFACE = Interface(
     headers=_AUTH_HEADERS,
     parameters=[
         fields.InterfaceField(base=fields.BooleanField(name="show_inactive"))
-    ] + _PAGING_PARAMETERS
+    ]
 )
 
 # Interface(s) for interacting with conference report objects.
@@ -114,7 +114,7 @@ LIST_CONFERENCE_REPORTS_INTERFACE = Interface(
 # Interface(s) for interacting with event objects.
 LIST_EVENTS_INTERFACE = Interface(
     method=HTTPMethod.GET,
-    behavior=EndpointBehavior.SHOW,
+    behavior=EndpointBehavior.LIST,
     headers=_AUTH_HEADERS,
     parameters=[
         fields.InterfaceField(base=fields.ModelIdField(name="child_id", is_required=True)),
@@ -133,7 +133,7 @@ LIST_FORMS_INTERFACE = Interface(
         fields.InterfaceField(base=fields.ModelIdField(name="child_id")),
         fields.InterfaceField(base=fields.DateField(name="created_before")),
         fields.InterfaceField(base=fields.DateField(name="created_after"))
-    ] + _PAGING_PARAMETERS
+    ]
 )
 GET_FORM_INTERFACE = Interface(
     method=HTTPMethod.GET,
@@ -151,7 +151,7 @@ LIST_FORM_TEMPLATES_INTERFACE = Interface(
     headers=_AUTH_HEADERS,
     parameters=[
 
-    ] + _PAGING_PARAMETERS
+    ]
 )
 
 # Interface(s) for for interacting with lesson set objects.
@@ -192,7 +192,7 @@ LIST_ONLINE_APPLICATIONS_INTERFACE = Interface(
     headers=_AUTH_HEADERS,
     parameters=[
         fields.InterfaceField(base=fields.DateTimeField(name="created_at"))
-    ] + _PAGING_PARAMETERS
+    ]
 )
 GET_ONLINE_APPLICATION_INTERFACE = Interface(
     method=HTTPMethod.GET,
@@ -233,7 +233,7 @@ LIST_SCHOOLS_INTERFACE = Interface(
     headers=_AUTH_HEADERS,
     parameters=[
 
-    ] + _PAGING_PARAMETERS
+    ]
 )
 
 # Interface(s) for for interacting with session objects.
@@ -243,7 +243,7 @@ LIST_SESSIONS_INTERFACE = Interface(
     headers=_AUTH_HEADERS,
     parameters=[
 
-    ] + _PAGING_PARAMETERS
+    ]
 )
 
 # Interface(s) for for interacting with user objects.
@@ -255,7 +255,7 @@ LIST_USERS_INTERFACE = Interface(
         fields.InterfaceField(base=fields.ModelIdField(name="classroom_id")),
         fields.InterfaceField(
             base=fields.MultiSelectField(
-                name="roles",
+                name="roles[]",
                 options=[
                     "teacher",
                     "parent",
@@ -265,7 +265,7 @@ LIST_USERS_INTERFACE = Interface(
                 ]
             )
         )
-    ] + _PAGING_PARAMETERS
+    ]
 )
 GET_USER_INTERFACE = Interface(
     method=HTTPMethod.GET,

@@ -395,12 +395,13 @@ class BooleanField(Field):
 
     """
 
-    def __init__(self, name: str, value: Optional[bool] = None, is_required: Optional[bool] = False) -> None:
+    def __init__(self, name: str, value: Optional[str] = None, is_required: Optional[bool] = False) -> None:
         """
         Construct the fields and it's assignment.
 
         :param name: str, The name of the variable.
-        :param value: Optional[bool], The value bound to this variable.
+        :param value: Optional[str], The value bound to this variable. Boolean parameters
+            on the API are strings ("true", "false").
         :param is_required: Optional[bool], Flag indicating whether the field is required.
         :return: None
 
@@ -493,7 +494,7 @@ class DateTimeField(Field):
             self,
             name: str,
             value: Optional[datetime] = None,
-            format: Optional[str] ="%Y-%m-%d %H:%M:%S.%f-%z",
+            format: Optional[str] ="%Y-%m-%dT%H:%M:%S.%f%z",
             is_required: Optional[bool] = False) -> None:
         """
         Construct the fields and it's assignment.

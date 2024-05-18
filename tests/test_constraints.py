@@ -217,25 +217,17 @@ class TestTypeConstraint(unittest.TestCase):
 
         constraint = constraints.IsBoolean(nullable=True)
 
-        # Check parameters
-        self.assertEqual(constraint.data_type, bool)
-        self.assertEqual(constraint.exception_type, exceptions.BooleanValueError)
-
         # Non-strict Validity Checks
-        self.assertTrue(constraint.is_valid(value=True, strict=False))
-        self.assertTrue(constraint.is_valid(value=False, strict=False))
+        self.assertTrue(constraint.is_valid(value="true", strict=False))
+        self.assertTrue(constraint.is_valid(value="false", strict=False))
         self.assertFalse(constraint.is_valid(value="1", strict=False))
         self.assertFalse(constraint.is_valid(value=1, strict=False))
         self.assertFalse(constraint.is_valid(value=1.2, strict=False))
         self.assertFalse(constraint.is_valid(value=[], strict=False))
 
         # Strict Validity Checks
-        self.assertTrue(constraint.is_valid(value=True, strict=True))
-        self.assertTrue(constraint.is_valid(value=False, strict=True))
-        self.assertRaises(exceptions.BooleanValueError, constraint.is_valid, **{"value": "1", "strict": True})
-        self.assertRaises(exceptions.BooleanValueError, constraint.is_valid, **{"value": 1, "strict": True})
-        self.assertRaises(exceptions.BooleanValueError, constraint.is_valid, **{"value": 1.2, "strict": True})
-        self.assertRaises(exceptions.BooleanValueError, constraint.is_valid, **{"value": [], "strict": True})
+        self.assertTrue(constraint.is_valid(value="true", strict=True))
+        self.assertTrue(constraint.is_valid(value="false", strict=True))
 
     def test_list_constraint(self) -> None:
         """

@@ -86,7 +86,7 @@ class Formatter(object):
 
         if value is not None:
             if isinstance(value, datetime):
-                return datetime.strftime(value, "%Y-%m-%d %H:%M:%S.%f-%z")
+                return datetime.strftime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
             elif isinstance(value, str):
                 return Formatter.datetime_to_str(value=Formatter.str_to_datetime(value=value))
             else:
@@ -124,6 +124,9 @@ class Formatter(object):
             if isinstance(value, datetime):
                 return value
             elif isinstance(value, str):
-                return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f-%z")
+                try:
+                    return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
+                except ValueError as e:
+                    return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S%z")
             else:
                 raise ValueError(f"The provided value {value} is not datetime-like.")

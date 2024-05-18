@@ -502,7 +502,7 @@ class IsPositiveInteger(IsGreaterThan, IsInteger):
         return is_valid and IsGreaterThan._is_valid(self, value=value, strict=strict)
 
 
-class IsBoolean(IsType):
+class IsBoolean(Constraint):
     """
     Is Boolean Constraint Class
 
@@ -524,11 +524,7 @@ class IsBoolean(IsType):
 
         """
 
-        super().__init__(
-            data_type=bool,
-            exception_type=exceptions.BooleanValueError,
-            nullable=nullable
-        )
+        super().__init__(nullable=nullable)
 
     def __copy__(self) -> 'IsBoolean':
         """
@@ -539,6 +535,24 @@ class IsBoolean(IsType):
         """
 
         return IsBoolean(nullable=self.nullable)
+
+    def _is_valid(self, value: Any, strict: Optional[bool] = False) -> bool:
+        """
+        Return whether the provided value is a boolean string ("true", "false")
+
+        :param value: Any, The value to check the validity of.
+        :param strict: Optional[bool], Flag indicating whether to strictly enforce the
+            constraint and raise an exception if the constraint fails.
+        :return: bool
+
+        """
+
+        is_valid = True
+
+        if value is not None:
+            is_valid = isinstance(value, str) and ((value == "true") or (value == "false"))
+
+        return is_valid
 
 
 class IsRequired(Constraint):

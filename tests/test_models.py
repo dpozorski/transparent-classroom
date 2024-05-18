@@ -88,7 +88,13 @@ class TestAuthModel(TestJSONModel):
 
         self.cls = models.Auth
         self.data = {
-
+            "school_id": 1,
+            "api_token": "foo",
+            "push_tokens": [],
+            "push_enabled": False,
+            "user": models.User(
+                id=1
+            )
         }
 
 
@@ -115,9 +121,15 @@ class TestActivityModel(TestJSONModel):
         self.data = {
             "id": 1,
             "author_id": 1,
-            "text": "Hello, World!",
+            "classroom_id": 1,
+            "normalized_text": "Hello, World!",
             "html": "<h1>Hello, World!</h1>",
             "date": datetime.today().date(),
+            "staff_unprocessed": True,
+            "photo_url": "https://www.hello.world/photo",
+            "medium_photo_url": "https://www.hello.world/medium-photo",
+            "large_photo_url": "https://www.hello.world/large-photo",
+            "original_photo_url": "https://www.hello.world/original-photo",
             "created_at": datetime.now()
         }
 
@@ -145,6 +157,7 @@ class TestChildModel(TestJSONModel):
         self.data = {
             "id": 1,
             "first_name": "Hello",
+            "middle_name": "Kind",
             "last_name": "World",
             "birth_date": datetime.today().date(),
             "gender": "M",
@@ -155,7 +168,7 @@ class TestChildModel(TestJSONModel):
             "dominant_language": "English",
             "grade": "2nd",
             "student_id": "1",
-            "hours_string": "8:00AM - 5:00PM",
+            "hours_string": "8:00AM(8:15AM) - 3:00PM M-F",
             "allergies": None,
             "notes": "Too cool for school",
             "first_day": datetime.today().date(),
@@ -163,6 +176,8 @@ class TestChildModel(TestJSONModel):
             "exit_notes": None,
             "exit_reason": None,
             "exit_survey_id": None,
+            "approved_adults_string": "Mr. and Mrs. Test",
+            "emergency_contacts_string": "Mr. and Mrs. Test",
             "parent_ids": [1, 2],
             "classroom_ids": [1, 2]
         }
@@ -221,7 +236,7 @@ class TestConferenceReportModel(TestJSONModel):
             "id": 1,
             "name": "Hello",
             "child_id": 1,
-            "data": [{
+            "widgets": [{
 
             }]
         }
@@ -285,13 +300,15 @@ class TestFormModel(TestJSONModel):
             "form_template_id": 1,
             "state": "submitted",
             "child_id": 1,
-            "student_first_name": "Hello",
-            "student_last_name": "World",
-            "parent_name": "Hello, World!",
-            "classroom": "Archipelago",
-            "release": "yes, yes, yes",
-            "signature": "Hello World",
-            "created_at": datetime.now()
+            "created_at": datetime.now(),
+            "fields": {
+                "student_first_name": "Hello",
+                "student_last_name": "World",
+                "parent_name": "Hello, World!",
+                "classroom": "Archipelago",
+                "release": "yes, yes, yes",
+                "signature": "Hello World"
+            }
         }
 
 
@@ -345,7 +362,9 @@ class TestLessonSetModel(TestJSONModel):
         self.data = {
             "id": 1,
             "name": "Hello, World!",
-            "children": []
+            "type": "Group",
+            "scales": [],
+            "areas": []
         }
 
 
@@ -370,7 +389,6 @@ class TestLevelModel(TestJSONModel):
 
         self.cls = models.Level
         self.data = {
-            "id": 1,
             "child_id": 1,
             "lesson_id": 1,
             "proficiency": 3,
@@ -402,14 +420,17 @@ class TestOnlineApplicationModel(TestJSONModel):
         self.data = {
             "id": 1,
             "school_id": 1,
+            "type": "form",
             "state": "accepted",
-            "program": "Elementary",
-            "child_first_name": "Hello",
-            "child_last_name": "World",
-            "child_birth_date": datetime.today().date(),
-            "child_gender": "M",
-            "mother_email": "hello@world.com",
-            "session_id": 1
+            "fields": {
+                "program": "Elementary",
+                "child_first_name": "Hello",
+                "child_last_name": "World",
+                "child_birth_date": datetime.today().date(),
+                "child_gender": "M",
+                "mother_email": "hello@world.com",
+                "session_id": 1
+            }
         }
 
 
@@ -504,7 +525,10 @@ class TestUserModel(TestJSONModel):
             "roles": ["teacher"],
             "accessible_classroom_ids": [1],
             "default_classroom_id": 1,
-            "address": "123 Hello World Lane",
+            "street": "123 Hello World Lane",
+            "postal_code": "11111",
+            "city": "Madison",
+            "state_province": "WI",
             "home_number": "(XXX) XXX-XXXX",
             "mobile_number": "(XXX) XXX-XXXX",
             "work_number": "(XXX) XXX-XXXX"
