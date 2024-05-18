@@ -2,6 +2,7 @@ import abc
 import datetime
 from typing import List, Optional, Dict, Any, Union
 from transparent_classroom.models.utilities import Formatter
+from collections import defaultdict
 
 
 class JSONModel(abc.ABC):
@@ -24,9 +25,22 @@ class JSONModel(abc.ABC):
         """
 
         data = {}
+        prefix = ''.join(['_', self.__class__.__name__, '__'])
 
         for key, value in vars(self).items():
-            data[key.lstrip("_")] = value
+            if not key.startswith(prefix):
+                if isinstance(value, list):
+                    tmp = []
+
+                    for item in value:
+                        if hasattr(item, 'to_dict'):
+                            tmp.append(item.to_dict())
+                        else:
+                            tmp.append(item)
+
+                    value = tmp
+
+                data[key.lstrip("_")] = value
 
         return data
 
@@ -73,6 +87,7 @@ class Model(JSONModel):
         Model Constructor
 
         :param id: Optional[int], The id of the Transparent Classroom object.
+        :return: None
 
         """
 
@@ -103,29 +118,6 @@ class Model(JSONModel):
         self._id = value
 
 
-class Auth(JSONModel):
-    """
-    Auth Model Class
-
-    This class represents the response object received from an authentication request to
-    the Transparent Classroom's auth endpoint.
-
-    Attributes:
-
-
-    """
-
-    def __init__(self) -> None:
-        """
-        Auth Model Constructor
-
-        :return: None
-
-        """
-
-        pass
-
-
 class Activity(Model):
     """
     Activity Model Class
@@ -133,9 +125,16 @@ class Activity(Model):
     Attributes:
         id (`int`): The Transparent Classroom object id of the activity.
         author_id (`int`): The id of the author who created the activity record.
-        text (`str`): The text describing the activity.
+        classroom_id (`int`): The id of the classroom where the activity occurred.
+        normalized_text (`str`): The text describing the activity.
         html (`str`): The HTML-string associated with the activity.
         date (`date`): The date the activity occurred upon.
+        staff_unprocessed (`bool`): Flag indicating whether the activity has been
+            processed by a school staff member.
+        photo_url (`str`): The url to the photo of the activity.
+        medium_photo_url (`str`): The (medium/resized) url to the photo of the activity.
+        large_photo_url (`str`): The (large/resized) url to the photo of the activity.
+        original_photo_url (`str`): The url to the original photo of the activity.
         created_at (`datetime`): The datetime/timestamp that the activity was recorded.
 
     """
@@ -144,26 +143,47 @@ class Activity(Model):
             self,
             id: Optional[int] = None,
             author_id: Optional[int] = None,
-            text: Optional[str] = None,
+            classroom_id: Optional[int] = None,
+            normalized_text: Optional[str] = None,
             html: Optional[str] = None,
             date: Optional[Union[datetime.date, str]] = None,
+            staff_unprocessed: Optional[bool] = None,
+            photo_url: Optional[str] = None,
+            medium_photo_url: Optional[str] = None,
+            large_photo_url: Optional[str] = None,
+            original_photo_url: Optional[str] = None,
             created_at: Optional[Union[datetime.datetime, str]] = None) -> None:
         """
 
         :param id: Optional[int], The Transparent Classroom object id of the activity.
         :param author_id: Optional[int], The id of the author who created the activity record.
-        :param text: Optional[str], The text describing the activity.
+        :param classroom_id: Optional[int], The id of the classroom where the activity occurred.
+        :param normalized_text: Optional[str], The text describing the activity.
         :param html: Optional[str], The HTML-string associated with the activity.
         :param date: Optional[Union[date, str]], The date the activity occurred upon.
+        :param staff_unprocessed: Optional[bool], Flag indicating whether the activity has been
+            processed by a school staff member.
+        :param photo_url: Optional[str], The url to the photo of the activity.
+        :param medium_photo_url: Optional[str], The (medium/resized) url to the photo of the activity.
+        :param large_photo_url: Optional[str], The (large/resized) url to the photo of the activity.
+        :param original_photo_url: Optional[str], The url to the original photo of the activity.
         :param created_at: Optional[Union[datetime, str]], The datetime/timestamp that the
             activity was recorded.
+        :return: None
+
         """
 
         super().__init__(id=id)
         self.author_id = author_id
-        self.text = text
+        self.classroom_id = classroom_id
+        self.normalized_text = normalized_text
         self.html = html
         self.date = date
+        self.staff_unprocessed = staff_unprocessed
+        self.photo_url = photo_url
+        self.medium_photo_url = medium_photo_url
+        self.large_photo_url = large_photo_url
+        self.original_photo_url = original_photo_url
         self.created_at = created_at
 
     @property
@@ -190,7 +210,30 @@ class Activity(Model):
         self._author_id = value
 
     @property
-    def text(self) -> str:
+    def classroom_id(self) -> int:
+        """
+        The id of the classroom whether the activity originated.
+
+        :return: int
+
+        """
+
+        return self._classroom_id
+
+    @classroom_id.setter
+    def classroom_id(self, value: int) -> None:
+        """
+        Set the id of the classroom whether the activity originated.
+
+        :param value: int, The id of the classroom whether the activity originated.
+        :return: None
+
+        """
+
+        self._classroom_id = value
+
+    @property
+    def normalized_text(self) -> str:
         """
         The text describing the activity.
 
@@ -198,10 +241,10 @@ class Activity(Model):
 
         """
 
-        return self._text
+        return self._normalized_text
 
-    @text.setter
-    def text(self, value: str) -> None:
+    @normalized_text.setter
+    def normalized_text(self, value: str) -> None:
         """
         Set the text describing the activity.
 
@@ -210,7 +253,7 @@ class Activity(Model):
 
         """
 
-        self._text = value
+        self._normalized_text = value
 
     @property
     def html(self) -> str:
@@ -259,6 +302,122 @@ class Activity(Model):
         self._date = Formatter.str_to_date(value=value)
 
     @property
+    def staff_unprocessed(self) -> bool:
+        """
+        The flag indicating whether the activity has been processed by a school staff member.
+
+        :return: bool
+
+        """
+
+        return self._staff_unprocessed
+
+    @staff_unprocessed.setter
+    def staff_unprocessed(self, value: bool) -> None:
+        """
+        Set the flag indicating whether the activity has been processed by a school staff member.
+
+        :param value: bool, The flag indicating whether the activity has been processed by a
+            school staff member.
+        :return: None
+
+        """
+
+        self._staff_unprocessed = value
+
+    @property
+    def photo_url(self) -> str:
+        """
+        The url to the photo of the activity.
+
+        :return: str
+
+        """
+
+        return self._photo_url
+
+    @photo_url.setter
+    def photo_url(self, value: str) -> None:
+        """
+        Set the url to the photo of the activity.
+
+        :param value: str, The url to the photo of the activity.
+        :return: None
+
+        """
+
+        self._photo_url = value
+
+    @property
+    def medium_photo_url(self) -> str:
+        """
+        The (medium/resized) url to the photo of the activity.
+
+        :return: str
+
+        """
+
+        return self._medium_photo_url
+
+    @medium_photo_url.setter
+    def medium_photo_url(self, value: str) -> None:
+        """
+        Set the (medium/resized) url to the photo of the activity.
+
+        :param value: str, The (medium/resized) url to the photo of the activity.
+        :return: None
+
+        """
+
+        self._medium_photo_url = value
+
+    @property
+    def large_photo_url(self) -> str:
+        """
+        The (large/resized) url to the photo of the activity.
+
+        :return: str
+
+        """
+
+        return self._large_photo_url
+
+    @large_photo_url.setter
+    def large_photo_url(self, value: str) -> None:
+        """
+        Set the (large/resized) url to the photo of the activity.
+
+        :param value: str, The (large/resized) url to the photo of the activity.
+        :return: None
+
+        """
+
+        self._large_photo_url = value
+
+    @property
+    def original_photo_url(self) -> str:
+        """
+        The url to the original photo of the activity.
+
+        :return: str
+
+        """
+
+        return self._original_photo_url
+
+    @original_photo_url.setter
+    def original_photo_url(self, value: str) -> None:
+        """
+        Set the url to the original photo of the activity.
+
+        :param value: str, The url to the original photo of the activity.
+        :return: None
+
+        """
+
+        self._original_photo_url = value
+
+    @property
     def created_at(self) -> datetime:
         """
         The datetime/timestamp that the activity was recorded.
@@ -289,6 +448,7 @@ class Child(Model):
     Attributes:
         id (`int`): The id of the child in Transparent Classroom.
         first_name (`str`): The child's first name.
+        middle_name (`str`): The child's middle name.
         last_name (`str`): The child's last name.
         birth_date (`date`): The child's date of birth.
         gender (`str`): The child's gender.
@@ -314,6 +474,10 @@ class Child(Model):
             of why the child/family left the school.
         exit_survey_id (`int`): The id of the exit survey (if the student
             has left the school) form.
+        approved_adults_string (`str`): The adults approved as guardians for the
+            child (picking them up, etc.).
+        emergency_contacts_string (`str`): The contact details to use in the case
+            of an emergency.
         parent_ids (`List[int]`): List of the child's parent/guardian ids.
         classroom_ids (`List[int]`): List of the classroom  ids that the
             child belongs to at the school.
@@ -324,6 +488,7 @@ class Child(Model):
             self,
             id: Optional[int] = None,
             first_name: Optional[str] = None,
+            middle_name: Optional[str] = None,
             last_name: Optional[str] = None,
             birth_date: Optional[Union[datetime.date, str]] = None,
             gender: Optional[str] = None,
@@ -342,16 +507,16 @@ class Child(Model):
             exit_notes: Optional[str] = None,
             exit_reason: Optional[str] = None,
             exit_survey_id: Optional[int] = None,
+            approved_adults_string: Optional[str] = None,
+            emergency_contacts_string: Optional[str] = None,
             parent_ids: Optional[List[int]] = None,
             classroom_ids: Optional[List[int]] = None) -> None:
         """
         Child Object Constructor
 
-        TODO:
-            - Response may include approved_adults_string (optional), emergency_contacts_string (optional)
-
         :param id: Optional[int], The id of the child in Transparent Classroom.
         :param first_name: Optional[str], The child's first name.
+        :param middle_name: Optional[str], The child's middle name.
         :param last_name: Optional[str], The child's last name.
         :param birth_date: Optional[Union[date, str]], The child's date of birth.
         :param gender: Optional[str], The child's gender.
@@ -377,6 +542,10 @@ class Child(Model):
             of why the child/family left the school.
         :param exit_survey_id: Optional[int], The id of the exit survey (if the student
             has left the school) form.
+        :param approved_adults_string: Optional[str], The adults approved as guardians for
+            the child (picking them up, etc.).
+        :param emergency_contacts_string: Optional[str], The contact details to use in the
+            case of an emergency.
         :param parent_ids: Optional[List[int]], List of the child's parent/guardian ids.
         :param classroom_ids: Optional[List[int]], List of the classroom ids that the
             child belongs to at the school.
@@ -386,6 +555,7 @@ class Child(Model):
 
         super().__init__(id=id)
         self.first_name = first_name
+        self.middle_name = middle_name
         self.last_name = last_name
         self.birth_date = birth_date
         self.gender = gender
@@ -404,6 +574,8 @@ class Child(Model):
         self.exit_notes = exit_notes
         self.exit_reason = exit_reason
         self.exit_survey_id = exit_survey_id
+        self.approved_adults_string = approved_adults_string
+        self.emergency_contacts_string = emergency_contacts_string
         self.parent_ids = parent_ids
         self.classroom_ids = classroom_ids
 
@@ -429,6 +601,29 @@ class Child(Model):
         """
 
         self._first_name = value
+
+    @property
+    def middle_name(self) -> str:
+        """
+        The middle name of the child in Transparent Classroom.
+
+        :return: str
+
+        """
+
+        return self._middle_name
+
+    @middle_name.setter
+    def middle_name(self, value: str) -> None:
+        """
+        Set the middle name of the child object.
+
+        :param value: str, The middle name of the child.
+        :return: None
+
+        """
+
+        self._middle_name = value
 
     @property
     def last_name(self) -> str:
@@ -824,6 +1019,53 @@ class Child(Model):
         self._exit_survey_id = value
 
     @property
+    def approved_adults_string(self) -> str:
+        """
+        The adults approved as guardians for the child (picking them up, etc.).
+
+        :return: str
+
+        """
+
+        return self._approved_adults_string
+
+    @approved_adults_string.setter
+    def approved_adults_string(self, value: str) -> None:
+        """
+        Set the adults approved as guardians for the child (picking them up, etc.).
+
+        :param value: str, The adults approved as guardians for the child (picking
+            them up, etc.).
+        :return: None
+
+        """
+
+        self._approved_adults_string = value
+
+    @property
+    def emergency_contacts_string(self) -> str:
+        """
+        The contact details to use in the case of an emergency.
+
+        :return: str
+
+        """
+
+        return self._emergency_contacts_string
+
+    @emergency_contacts_string.setter
+    def emergency_contacts_string(self, value: str) -> None:
+        """
+        Set the contact details to use in the case of an emergency.
+
+        :param value: str, The contact details to use in the case of an emergency.
+        :return: None
+
+        """
+
+        self._emergency_contacts_string = value
+
+    @property
     def parent_ids(self) -> List[int]:
         """
         The list of the child's parent/guardian ids.
@@ -1003,15 +1245,115 @@ class Classroom(Model):
         self._active = value
 
 
-class ConferenceReport(Model):
+class Widget(JSONModel):
     """
-    Conference Report Model Class
+    Widget Class
 
     Attributes:
-        id (`int`): The Transparent Classroom object id of the conference report.
-        name (`str`): The name of the conference report.
-        child_id (`int`): The id of child that the conference report has been filed for.
-        data (`List`): The data held in the conference report.
+        type (`str`): The type of form widget.
+
+    """
+
+    def __init__(self, attributes: Optional[Dict] = None) -> None:
+        """
+        Widget Constructor
+
+        :param attributes: Optional[Dict], The
+        :return: None
+
+        """
+
+        super().__init__()
+        attributes = {} if attributes is None else attributes
+        self.__attributes = defaultdict(lambda: None, attributes)
+
+        for k, v in self.__attributes.items():
+            self.__setattr__(k, v)
+
+    def get(self, key: str) -> Any:
+        """
+        Get the specified attribute value.
+
+        :param key: str, The name of the attribute to return.
+        :return: None
+
+        """
+
+        return self.__attributes.get(key)
+
+    def remove(self, key: str) -> None:
+        """
+        Remove the specified attribute from the widget.
+
+        :param key: str, The name of the attribute to remove.
+        :return: None
+
+        """
+
+        if key in self.__attributes.keys():
+            del self.__attributes[key]
+            self.__delattr__(key)
+
+    def set(self, key: str, value: Any) -> None:
+        """
+        Set the specified attribute name, value pair.
+
+        :param key: str, The name of the attribute to set.
+        :param value: Any, The value to associated with the key.
+        :return: None
+
+        """
+
+        self.__attributes[key] = value
+        self.__setattr__(key, value)
+
+    def clear(self) -> None:
+        """
+        Remove all existing attributes defining the Widget.
+
+        :return: None
+
+        """
+
+        for k in list(self.__attributes.keys()):
+            self.remove(key=k)
+
+    def reset(self, attributes: Optional[Dict] = None) -> None:
+        """
+        Reset the widget with the provided attributes and data.
+
+        :param attributes: Optional[Dict], The attributes to reset the Widget with.
+        :return: None
+
+        """
+
+        self.clear()
+        attributes = {} if attributes is None else attributes
+        self.__attributes = defaultdict(lambda: None, attributes)
+
+        for k, v in self.__attributes.items():
+            self.__setattr__(k, v)
+
+    @property
+    def attributes(self) -> List[str]:
+        """
+        The list of attribute names defining the Widget.
+
+        :return: List[str]
+
+        """
+
+        return list(self.__attributes.keys())
+
+
+class FormTemplate(Model):
+    """
+    Form Template Model Class
+
+    Attributes:
+        id (`int`): The Transparent Classroom object id of the form template.
+        name (`str`): The name of the form template.
+        widgets (`List[Widget]`): The list of widgets composing the template.
 
     """
 
@@ -1019,28 +1361,25 @@ class ConferenceReport(Model):
             self,
             id: Optional[int] = None,
             name: Optional[str] = None,
-            child_id: Optional[int] = None,
-            data: Optional[List] = None) -> None:
+            widgets: Optional[List[Widget]] = None) -> None:
         """
-        Conference Report Constructor
+        Form Template Constructor
 
-        :param id: Optional[int], Transparent Classroom object id of the conference report.
-        :param name: Optional[str], The name of the conference report.
-        :param child_id: Optional[int], The id of child that the conference report has been filed for.
-        :param data: Optional[List], The data held in the conference report.
+        :param id: Optional[int], The Transparent Classroom object id of the form template.
+        :param name: Optional[str], The name of the form template.
+        :param widgets: Optional[List[Widget]], The list of widgets composing the template.
         :return: None
 
         """
 
         super().__init__(id=id)
         self.name = name
-        self.child_id = child_id
-        self.data = data
+        self.widgets = widgets
 
     @property
     def name(self) -> str:
         """
-        The name of the conference report.
+        The name of the form template.
 
         :return: str
 
@@ -1051,14 +1390,72 @@ class ConferenceReport(Model):
     @name.setter
     def name(self, value: str) -> None:
         """
-        Set the name of the conference report.
+        Set the name of the form template.
 
-        :param value: str, The name of the conference report.
+        :param value: str, The name of the form template.
         :return: None
 
         """
 
         self._name = value
+
+    @property
+    def widgets(self) -> List[Widget]:
+        """
+        The list of widgets composing the template.
+
+        :return: List[Widget]
+
+        """
+
+        return self._widgets
+
+    @widgets.setter
+    def widgets(self, value: List[Widget]) -> None:
+        """
+        Set the list of widgets composing the template.
+
+        :param value: List[Widget], The list of widgets composing the template.
+        :return: None
+
+        """
+
+        self._widgets = [] if value is None else value
+
+
+class ConferenceReport(FormTemplate):
+    """
+    Conference Report Model Class
+
+    Attributes:
+        id (`int`): The Transparent Classroom object id of the conference report.
+        name (`str`): The name of the conference report.
+        child_id (`int`): The id of child that the conference report has been filed for.
+        widgets (`List[Widget]`): The (populated) widget data filled out in the complete
+            (or partially complete) conference report.
+
+    """
+
+    def __init__(
+            self,
+            id: Optional[int] = None,
+            name: Optional[str] = None,
+            child_id: Optional[int] = None,
+            widgets: Optional[List[Widget]] = None) -> None:
+        """
+        Conference Report Constructor
+
+        :param id: Optional[int], Transparent Classroom object id of the conference report.
+        :param name: Optional[str], The name of the conference report.
+        :param child_id: Optional[int], The id of child that the conference report has been filed for.
+        :param widgets: Optional[List[Widget]], The (populated) widget data filled out in the complete
+            (or partially complete) conference report.
+        :return: None
+
+        """
+
+        super().__init__(id=id, name=name, widgets=widgets)
+        self.child_id = child_id
 
     @property
     def child_id(self) -> int:
@@ -1082,29 +1479,6 @@ class ConferenceReport(Model):
         """
 
         self._child_id = value
-
-    @property
-    def data(self) -> List:
-        """
-        The data held in the conference report.
-
-        :return: List
-
-        """
-
-        return self._data
-
-    @data.setter
-    def data(self, value: List) -> None:
-        """
-        Set the data held in the conference report.
-
-        :param value: List, The data held in the conference report.
-        :return: None
-
-        """
-
-        self._data = value
 
 
 class Event(Model):
@@ -1346,6 +1720,77 @@ class Event(Model):
         self._time = Formatter.str_to_datetime(value=value)
 
 
+class Field(JSONModel):
+    """
+    Form Field Class
+
+    Attributes:
+        name (`str`): The name of the field.
+        value (`Any`): The value (provided by the user) when filling out the form.
+
+    """
+
+    def __init__(self, name: Optional[str] = None, value: Optional[Any] = None) -> None:
+        """
+        Form Constructor
+
+        :param name: Optional[str], The name of the field.
+        :param value: Optional[Any], The value (provided by the user) when filling out the form.
+        :return: None
+
+        """
+
+        super().__init__()
+        self.name = name
+        self.value = value
+
+    @property
+    def name(self) -> str:
+        """
+        The name of the field.
+
+        :return: str
+
+        """
+
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        """
+        Set the name of the field.
+
+        :param value: str, The name of the field.
+        :return: None
+
+        """
+
+        self._name = value
+
+    @property
+    def value(self) -> Any:
+        """
+        The value (provided by the user) when filling out the form.
+
+        :return: Any
+
+        """
+
+        return self._value
+
+    @value.setter
+    def value(self, value: Any) -> None:
+        """
+        Set the value (provided by the user) when filling out the form.
+
+        :param value: Any, The value (provided by the user) when filling out the form.
+        :return: None
+
+        """
+
+        self._value = value
+
+
 class Form(Model):
     """
     Form Model Class
@@ -1355,12 +1800,7 @@ class Form(Model):
         form_template_id (`int`): The id of the form template that this form is derived from.
         state (`str`): The submission state of the form (e.g. `submitted`, etc.).
         child_id (`int`): The id of the child associated with the form submission.
-        student_first_name (`str`): The first name of the associated student.
-        student_last_name (`str`): The last name of the associated student.
-        parent_name (`str`): The name of the associated student's parent.
-        classroom (`str`): The name of the classroom to which the form has been submitted.
-        release (`str`): Permission/release agreement to take/use photos, etc. of the student.
-        signature (`str`): The parent's signature validating the form.
+        fields (`List[Widget]`): The question-answer responses provided by the respondent on the form.
         created_at (`datetime`): The datetime of when the form was created.
 
     """
@@ -1371,12 +1811,7 @@ class Form(Model):
             form_template_id: Optional[int] = None,
             state: Optional[str] = None,
             child_id: Optional[int] = None,
-            student_first_name: Optional[str] = None,
-            student_last_name: Optional[str] = None,
-            parent_name: Optional[str] = None,
-            classroom: Optional[str] = None,
-            release: Optional[str] = None,
-            signature: Optional[str] = None,
+            fields: Optional[List[Widget]] = None,
             created_at: Optional[Union[datetime.datetime, str]] = None) -> None:
         """
         Form Constructor
@@ -1385,12 +1820,7 @@ class Form(Model):
         :param form_template_id: Optional[int], The id of the form template that this form is derived from.
         :param state: Optional[str], The submission state of the form (e.g. `submitted`, etc.).
         :param child_id: Optional[int], The id of the child associated with the form submission.
-        :param student_first_name: Optional[str], The first name of the associated student.
-        :param student_last_name: Optional[str], The last name of the associated student.
-        :param parent_name: Optional[str], The name of the associated student's parent.
-        :param classroom: Optional[str], The name of the classroom to which the form has been submitted.
-        :param release: Optional[str], Permission/release agreement to take/use photos, etc. of the student.
-        :param signature: Optional[str], The parent's signature validating the form.
+        :param fields: Optional[List[Widget]], The question-answer responses provided by the respondent on the form.
         :param created_at: Optional[Union[datetime, str]], The datetime of when the form was created.
         :return: None
 
@@ -1400,12 +1830,7 @@ class Form(Model):
         self.form_template_id = form_template_id
         self.state = state
         self.child_id = child_id
-        self.student_first_name = student_first_name
-        self.student_last_name = student_last_name
-        self.parent_name = parent_name
-        self.classroom = classroom
-        self.release = release
-        self.signature = signature
+        self.fields = fields
         self.created_at = created_at
 
     @property
@@ -1478,142 +1903,28 @@ class Form(Model):
         self._child_id = value
 
     @property
-    def student_first_name(self) -> str:
+    def fields(self) -> List[Widget]:
         """
-        The first name of the associated student.
+        The question-answer responses provided by the respondent on the form.
 
-        :return: str
+        :return: List[Widget]
 
         """
 
-        return self._student_first_name
+        return self._fields
 
-    @student_first_name.setter
-    def student_first_name(self, value: str) -> None:
+    @fields.setter
+    def fields(self, value: List[Widget]) -> None:
         """
-        Set the first name of the associated student.
+        Set the question-answer responses provided by the respondent on the form.
 
-        :param value: str, The first name of the associated student.
+        :param value: List[Widget], The question-answer responses provided by the respondent
+            on the form.
         :return: None
 
         """
 
-        self._student_first_name = value
-
-    @property
-    def student_last_name(self) -> str:
-        """
-        The last name of the associated student.
-
-        :return: str
-
-        """
-
-        return self._student_last_name
-
-    @student_last_name.setter
-    def student_last_name(self, value: str) -> None:
-        """
-        Set the last name of the associated student.
-
-        :param value: str, The last name of the associated student.
-        :return: None
-
-        """
-
-        self._student_last_name = value
-
-    @property
-    def parent_name(self) -> str:
-        """
-        The name of the associated student's parent.
-
-        :return: str
-
-        """
-
-        return self._parent_name
-
-    @parent_name.setter
-    def parent_name(self, value: str) -> None:
-        """
-        Set the name of the associated student's parent.
-
-        :param value: str, The name of the associated student's parent.
-        :return: None
-
-        """
-
-        self._parent_name = value
-
-    @property
-    def classroom(self) -> str:
-        """
-        The name of the classroom to which the form has been submitted.
-
-        :return: str
-
-        """
-
-        return self._classroom
-
-    @classroom.setter
-    def classroom(self, value: str) -> None:
-        """
-        Set the name of the classroom to which the form has been submitted.
-
-        :param value: str, The name of the classroom to which the form has been submitted.
-        :return: None
-
-        """
-
-        self._classroom = value
-
-    @property
-    def release(self) -> str:
-        """
-        Permission/release agreement to take/use photos, etc. of the student.
-
-        :return: str
-
-        """
-
-        return self._release
-
-    @release.setter
-    def release(self, value: str) -> None:
-        """
-        Set the permission/release agreement to take/use photos, etc. of the student.
-
-        :param value: str, The permission/release agreement to take/use photos, etc. of the student.
-        :return: None
-
-        """
-
-        self._release = value
-
-    @property
-    def signature(self) -> str:
-        """
-        The parent's signature validating the form.
-
-        :return: str
-
-        """
-
-        return self._signature
-
-    @signature.setter
-    def signature(self, value: str) -> None:
-        """
-        Set the parent's signature validating the form.
-
-        :param value: str, The parent's signature validating the form.
-        :return: None
-
-        """
-
-        self._signature = value
+        self._fields = [] if value is None else value
 
     @property
     def created_at(self) -> datetime:
@@ -1639,40 +1950,74 @@ class Form(Model):
         self._created_at = Formatter.str_to_datetime(value=value)
 
 
-class FormTemplate(Model):
+class ArchetypeInterface(Model):
     """
-    Form Template Model Class
+    Archetype Interface Model Class
+
+    The Archetype Interface is a set of attributes common to the nested
+    objects found in a lesson set.
 
     Attributes:
-        id (`int`): The Transparent Classroom object id of the form template.
-        name (`str`): The name of the form template.
-        widgets (`List`): The list of widgets composing the template.
+        id (`int`): The Transparent Classroom object id of the lesson set.
+        archetype_id (`int`): The id of the archetype.
+        name (`str`): The name of the lesson, group, or material being worked.
+        type (`str`): The type of the archetype object (group, lesson, etc.)
+        description (`str`): The description of the object.
 
     """
 
     def __init__(
             self,
             id: Optional[int] = None,
+            archetype_id: Optional[int] = None,
             name: Optional[str] = None,
-            widgets: Optional[List] = None) -> None:
+            type: Optional[str] = None,
+            description: Optional[str] = None):
         """
-        Form Template Constructor
+        ArchetypeInterface Constructor
 
-        :param id: Optional[int], The Transparent Classroom object id of the form template.
-        :param name: Optional[str], The name of the form template.
-        :param widgets: Optional[List], The list of widgets composing the template.
+        :param id: Optional[int], The Transparent Classroom object id of the archetyped object.
+        :param archetype_id: Optional[int], The id of the archetype.
+        :param name: Optional[str], The name of the lesson, group, or material being worked.
+        :param type: Optional[str], The type of the archetype object (group, lesson, etc.)
+        :param description: Optional[str], The description of the object.
         :return: None
 
         """
 
         super().__init__(id=id)
+        self.archetype_id = archetype_id
         self.name = name
-        self.widgets = widgets
+        self.type = type
+        self.description = description
+
+    @property
+    def archetype_id(self) -> int:
+        """
+        The id of the archetype.
+
+        :return: int
+
+        """
+
+        return self._archetype_id
+
+    @archetype_id.setter
+    def archetype_id(self, value: int) -> None:
+        """
+        Set the id of the archetype.
+
+        :param value: int, The id of the archetype.
+        :return: None
+
+        """
+
+        self._archetype_id = value
 
     @property
     def name(self) -> str:
         """
-        The name of the form template.
+        The name of the lesson, group, or material being worked.
 
         :return: str
 
@@ -1683,9 +2028,9 @@ class FormTemplate(Model):
     @name.setter
     def name(self, value: str) -> None:
         """
-        Set the name of the form template.
+        Set the name of the lesson, group, or material being worked.
 
-        :param value: str, The name of the form template.
+        :param value: str, The name of the lesson, group, or material being worked.
         :return: None
 
         """
@@ -1693,27 +2038,411 @@ class FormTemplate(Model):
         self._name = value
 
     @property
-    def widgets(self) -> List:
+    def type(self) -> str:
         """
-        The list of widgets composing the template.
+        The type of the archetype object (group, lesson, etc.)
 
-        :return: List
+        :return: str
 
         """
 
-        return self._widgets
+        return self._type
 
-    @widgets.setter
-    def widgets(self, value: List) -> None:
+    @type.setter
+    def type(self, value: str) -> None:
         """
-        Set the list of widgets composing the template.
+        Set the type of the archetype object (group, lesson, etc.)
 
-        :param value: List, The list of widgets composing the template.
+        :param value: str, The type of the archetype object (group, lesson, etc.)
         :return: None
 
         """
 
-        self._widgets = value
+        self._type = value
+
+    @property
+    def description(self) -> str:
+        """
+        The description of the object.
+
+        :return: str
+
+        """
+
+        return self._description
+
+    @description.setter
+    def description(self, value: str) -> None:
+        """
+        Set the description of the object.
+
+        :param value: str, The description of the object.
+        :return: None
+
+        """
+
+        self._description = value
+
+
+class Lesson(ArchetypeInterface):
+    """
+    Lesson Model Class
+
+    A Lesson object represents a single lesson to be taught.
+
+    Attributes:
+        id (`int`): The Transparent Classroom object id of the group.
+        archetype_id (`int`): The id of the archetype.
+        name (`str`): The name of the lesson, group, or material being worked.
+        lesson_type (`str`): The type of lesson (masterable, ongoing, etc.)
+        material (`str`): The material associated with this lesson.
+        type (`str`): The type of the archetype object (group, lesson, etc.)
+        photo (`str`): The profile photo exemplifying the lesson.
+        description (`str`): The description of the object.
+
+    """
+
+    def __init__(
+            self,
+            id: Optional[int] = None,
+            archetype_id: Optional[int] = None,
+            name: Optional[str] = None,
+            lesson_type: Optional[str] = None,
+            material: Optional[str] = None,
+            type: Optional[str] = None,
+            photo: Optional[str] = None,
+            description: Optional[str] = None):
+        """
+        Lesson Constructor
+
+        :param id: Optional[int], The Transparent Classroom object id of the archetyped object.
+        :param archetype_id: Optional[int], The id of the archetype.
+        :param name: Optional[str], The name of the lesson, group, or material being worked.
+        :param lesson_type: Optional[str], The type of lesson (masterable, ongoing, etc.)
+        :param material: Optional[str], The material associated with this lesson.
+        :param type: Optional[str], The type of the archetype object (group, lesson, etc.)
+        :param photo: Optional[str], The profile photo exemplifying the lesson.
+        :param description: Optional[str], The description of the object.
+        :return: None
+
+        """
+
+        super().__init__(
+            id=id,
+            archetype_id=archetype_id,
+            name=name,
+            type=type,
+            description=description
+        )
+        self.lesson_type = lesson_type
+        self.material = material
+        self.photo = photo
+
+    @property
+    def lesson_type(self) -> str:
+        """
+        The type of lesson (masterable, ongoing, etc.)
+
+        :return: str
+
+        """
+
+        return self._lesson_type
+
+    @lesson_type.setter
+    def lesson_type(self, value: str) -> None:
+        """
+        Set the type of lesson (masterable, ongoing, etc.)
+
+        :param value: str, The type of lesson (masterable, ongoing, etc.)
+        :return: None
+
+        """
+
+        self._lesson_type = value
+
+    @property
+    def material(self) -> str:
+        """
+        The material associated with this lesson.
+
+        :return: str
+
+        """
+
+        return self._material
+
+    @material.setter
+    def material(self, value: str) -> None:
+        """
+        Set the material associated with this lesson.
+
+        :param value: str, The material associated with this lesson.
+        :return: None
+
+        """
+
+        self._material = value
+
+    @property
+    def photo(self) -> str:
+        """
+        The profile photo exemplifying the lesson.
+
+        :return: str
+
+        """
+
+        return self._photo
+
+    @photo.setter
+    def photo(self, value: str) -> None:
+        """
+        Set the profile photo exemplifying the lesson.
+
+        :param value: str, The profile photo exemplifying the lesson.
+        :return: None
+
+        """
+
+        self._photo = value
+
+
+class Group(ArchetypeInterface):
+    """
+    Group Model Class
+
+    A Group object represents a group of lessons in a specific area.
+
+    Attributes:
+        id (`int`): The Transparent Classroom object id of the group.
+        archetype_id (`int`): The id of the archetype.
+        name (`str`): The name of the lesson, group, or material being worked.
+        type (`str`): The type of the archetype object (group, lesson, etc.)
+        description (`str`): The description of the object.
+        subgroups (`List[Group]`): The subgroups defining this lesson set group.
+        lessons (`List[Lesson]`): The lessons under this group.
+
+    """
+
+    def __init__(
+            self,
+            id: Optional[int] = None,
+            archetype_id: Optional[int] = None,
+            name: Optional[str] = None,
+            type: Optional[str] = None,
+            description: Optional[str] = None,
+            subgroups: List['Group'] = None,
+            lessons: List[Lesson] = None) -> None:
+        """
+        Group Constructor
+
+        :param id: Optional[int], The Transparent Classroom object id of the archetyped object.
+        :param archetype_id: Optional[int], The id of the archetype.
+        :param name: Optional[str], The name of the lesson, group, or material being worked.
+        :param type: Optional[str], The type of the archetype object (group, lesson, etc.)
+        :param description: Optional[str], The description of the object.
+        :param subgroups: Optional[List[Group]], The groups defining this lesson set group.
+        :param lessons: Optional[List[Lesson]], The lessons under this group.
+        :return: None
+
+        """
+
+        super().__init__(
+            id=id,
+            archetype_id=archetype_id,
+            name=name,
+            type=type,
+            description=description
+        )
+        self.subgroups = subgroups
+        self.lessons = lessons
+
+    @property
+    def subgroups(self) -> List['Group']:
+        """
+        The subgroups defining this lesson set area.
+
+        :return: List[Group]
+
+        """
+
+        return self._subgroups
+
+    @subgroups.setter
+    def subgroups(self, value: List['Group']) -> None:
+        """
+        Set the subgroups defining this lesson set area.
+
+        :param value: List[Group], The subgroups defining this lesson set area.
+        :return: None
+
+        """
+
+        self._subgroups = [] if value is None else value
+
+    @property
+    def lessons(self) -> List['Lesson']:
+        """
+        The lessons under this group.
+
+        :return: List[Lesson]
+
+        """
+
+        return self._lessons
+
+    @lessons.setter
+    def lessons(self, value: List['Lesson']) -> None:
+        """
+        Set the lessons under this group.
+
+        :param value: List[Lesson], The lessons under this group.
+        :return: None
+
+        """
+
+        self._lessons = [] if value is None else value
+
+
+class Area(ArchetypeInterface):
+    """
+    Area Model Class
+
+    An Area object represents an area of lessons.
+
+    Attributes:
+        id (`int`): The Transparent Classroom object id of the lesson set.
+        archetype_id (`int`): The id of the archetype.
+        name (`str`): The name of the lesson, group, or material being worked.
+        type (`str`): The type of the archetype object (group, lesson, etc.)
+        description (`str`): The description of the object.
+        groups (`List[Group]`): The groups defining this lesson set area.
+
+    """
+
+    def __init__(
+            self,
+            id: Optional[int] = None,
+            archetype_id: Optional[int] = None,
+            name: Optional[str] = None,
+            type: Optional[str] = None,
+            description: Optional[str] = None,
+            groups: List[Group] = None) -> None:
+        """
+        Area Constructor
+
+        :param id: Optional[int], The Transparent Classroom object id of the archetyped object.
+        :param archetype_id: Optional[int], The id of the archetype.
+        :param name: Optional[str], The name of the lesson, group, or material being worked.
+        :param type: Optional[str], The type of the archetype object (group, lesson, etc.)
+        :param description: Optional[str], The description of the object.
+        :param groups: Optional[List[Group]], The groups defining this lesson set area.
+        :return: None
+
+        """
+
+        super().__init__(
+            id=id,
+            archetype_id=archetype_id,
+            name=name,
+            type=type,
+            description=description
+        )
+        self.groups = groups
+
+    @property
+    def groups(self) -> List[Group]:
+        """
+        The groups defining this lesson set area.
+
+        :return: List[Group]
+
+        """
+
+        return self._groups
+
+    @groups.setter
+    def groups(self, value: List[Group]) -> None:
+        """
+        Set the groups defining this lesson set area.
+
+        :param value: List[Group], The groups defining this lesson set area.
+        :return: None
+
+        """
+
+        self._groups = [] if value is None else value
+
+
+class Scale(JSONModel):
+    """
+    Scale Class
+
+    Attributes:
+        name (`str`): The name of the scale.
+        values (`List`): The values of the scale/metric.
+
+    """
+
+    def __init__(self, name: Optional[str] = None, values: Optional[List] = None) -> None:
+        """
+        Scale Constructor
+
+        :param name: Optional[str], The name of the scale.
+        :param values: Optional[List], The values of the scale/metric.
+        :return: None
+
+        """
+
+        self.name = name
+        self.values = values
+
+    @property
+    def name(self) -> str:
+        """
+        The name of the scale.
+
+        :return: str
+
+        """
+
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        """
+        Set the name of the scale.
+
+        :param value: str, The name of the scale.
+        :return: None
+
+        """
+
+        self._name = value
+
+    @property
+    def values(self) -> List[str]:
+        """
+        The values of the scale/metric.
+
+        :return: List[str]
+
+        """
+
+        return self._values
+
+    @values.setter
+    def values(self, value: List[str]) -> None:
+        """
+        Set the values of the scale/metric.
+
+        :param value: List[str], The values of the scale/metric.
+        :return: None
+
+        """
+
+        self._values = [None] * 6 if value is None else value
 
 
 class LessonSet(Model):
@@ -1723,24 +2452,40 @@ class LessonSet(Model):
     Attributes:
         id (`int`): The Transparent Classroom object id of the lesson set.
         name (`str`): The name of the lesson set.
-        children (`List`): The children lesson sets/lessons.
+        type (`str`): The lesson set/object type.
+        areas (`List[Area]`): The list of lesson set areas associated with this lesson
+            set.
+        scales (`List[Scale]`): The scales/metrics used for when defining student
+            engagement with a specific lesson in the lesson set.
 
     """
 
-    def __init__(self, id: Optional[int] = None, name: Optional[str] = None, children: Optional[List] = None) -> None:
+    def __init__(
+            self,
+            id: Optional[int] = None,
+            name: Optional[str] = None,
+            type: Optional[str] = None,
+            areas: Optional[List[Area]] = None,
+            scales: Optional[List[Scale]] = None) -> None:
         """
         Lesson Set Constructor
 
         :param id: Optional[int], The Transparent Classroom object id of the lesson set.
         :param name: Optional[str], The name of the lesson set.
-        :param children: Optional[List], The children lesson sets/lessons.
+        :param type: Optional[str], lesson set/object type.
+        :param areas: Optional[List[Area]], The list of lesson set areas associated with
+            this lesson set.
+        :param scales: Optional[List[Scale]], scales/metrics used for when defining student
+            engagement with a specific lesson in the lesson set.
         :return: None
 
         """
 
         super().__init__(id=id)
         self.name = name
-        self.children = children
+        self.type = type
+        self.areas = areas
+        self.scales = scales
 
     @property
     def name(self) -> str:
@@ -1766,35 +2511,83 @@ class LessonSet(Model):
         self._name = value
 
     @property
-    def children(self) -> List:
+    def type(self) -> str:
         """
-        The children lesson sets/lessons.
+        The lesson set/object type.
 
-        :return: List
+        :return: str
 
         """
 
-        return self._children
+        return self._type
 
-    @children.setter
-    def children(self, value: List) -> None:
+    @type.setter
+    def type(self, value: str) -> None:
         """
-        Set the children lesson sets/lessons.
+        Set the lesson set/object type.
 
-        :param value: List, The children lesson sets/lessons.
+        :param value: str, The lesson set/object type.
         :return: None
 
         """
 
-        self._children = value
+        self._type = value
+
+    @property
+    def areas(self) -> List[Area]:
+        """
+        The children lesson sets/lessons.
+
+        :return: List[Area]
+
+        """
+
+        return self._areas
+
+    @areas.setter
+    def areas(self, value: List[Area]) -> None:
+        """
+        Set the children lesson sets/lessons.
+
+        :param value: List[Area], The children lesson sets/lessons.
+        :return: None
+
+        """
+
+        self._areas = [] if value is None else value
+
+    @property
+    def scales(self) -> List[Scale]:
+        """
+        The scales/metrics used for when defining student engagement with a
+            specific lesson in the lesson set.
+
+        :return: List[Scale]
+
+        """
+
+        return self._scales
+
+    @scales.setter
+    def scales(self, value: List[Scale]) -> None:
+        """
+        Set the scales/metrics used for when defining student engagement with a
+            specific lesson in the lesson set.
+
+        :param value: List[Scale], The scales/metrics used for when defining student
+            engagement with a specific lesson in the lesson set.
+        :return: None
+
+        """
+
+        self._scales = [] if value is None else value
 
 
-class Level(Model):
+class Level(JSONModel):
     """
     Level Model Class
 
     Attributes:
-        id (`int`): The Transparent Classroom object id of the level.
         child_id (`int`): The id of the child associated with this lesson's proficiency level.
         lesson_id (`int`): The id of the lesson given to the child for the level assessment.
         proficiency (`int`): The proficiency score assessed to the student on the lesson.
@@ -1805,7 +2598,6 @@ class Level(Model):
 
     def __init__(
             self,
-            id: Optional[int] = None,
             child_id: Optional[int] = None,
             lesson_id: Optional[int] = None,
             proficiency: Optional[int] = None,
@@ -1814,7 +2606,6 @@ class Level(Model):
         """
         Level Constructor
 
-        :param id: Optional[int], The Transparent Classroom object id of the level.
         :param child_id: Optional[int], The id of the child associated with this lesson's proficiency level.
         :param lesson_id: Optional[int], The id of the lesson given to the child for the level assessment.
         :param proficiency: Optional[int], The proficiency score assessed to the student on the lesson.
@@ -1824,7 +2615,6 @@ class Level(Model):
 
         """
 
-        super().__init__(id=id)
         self.child_id = child_id
         self.lesson_id = lesson_id
         self.proficiency = proficiency
@@ -1954,14 +2744,9 @@ class OnlineApplication(Model):
     Attributes:
         id (`int`): The Transparent Classroom object id of the online application.
         school_id (`int`): The id of the school that the child/family is applying to.
+        type (`str`): The type of form/application.
         state (`str`): The submission state of the online application.
-        program (`str`): The program at the school that the child/family is applying to.
-        child_first_name (`str`): The applicant child's first name.
-        child_last_name (`str`): The applicant child's last name.
-        child_birth_date (`date`): The applicant child's birthdate.
-        child_gender (`str`): The applicant child's gender.
-        mother_email (`str`): The mother of the applicant child's email address.
-        session_id (`int`):  The session that the child/family is applying to.
+        fields (`Dict`): The question-answer responses provided by the respondent on the form.
 
     """
 
@@ -1969,41 +2754,27 @@ class OnlineApplication(Model):
             self,
             id: Optional[int] = None,
             school_id: Optional[int] = None,
+            type: Optional[str] = None,
             state: Optional[str] = None,
-            program: Optional[str] = None,
-            child_first_name: Optional[str] = None,
-            child_last_name: Optional[str] = None,
-            child_birth_date: Optional[Union[datetime.date, str]] = None,
-            child_gender: Optional[str] = None,
-            mother_email: Optional[str] = None,
-            session_id: Optional[int] = None) -> None:
+            fields: Optional[List[Widget]] = None) -> None:
         """
         Online Application Constructor
 
         :param id: Optional[int], The Transparent Classroom object id of the online application.
         :param school_id: Optional[int], The id of the school that the child/family is applying to.
+        :param type: Optional[str], The type of form/application.
         :param state: Optional[str], The submission state of the online application.
-        :param program: Optional[str], The program at the school that the child/family is applying to.
-        :param child_first_name: Optional[str], The applicant child's first name.
-        :param child_last_name: Optional[str], The applicant child's last name.
-        :param child_birth_date: Optional[Union[date, str]], The applicant child's birthdate.
-        :param child_gender: Optional[str], The applicant child's gender.
-        :param mother_email: Optional[str], The mother of the applicant child's email address.
-        :param session_id: Optional[int], The session that the child/family is applying to.
+        :param fields: Optional[List[Widget]], The question-answer responses provided by the respondent on
+            the form.
         :return: None
 
         """
 
         super().__init__(id=id)
         self.school_id = school_id
+        self.type = type
         self.state = state
-        self.program = program
-        self.child_first_name = child_first_name
-        self.child_last_name = child_last_name
-        self.child_birth_date = child_birth_date
-        self.child_gender = child_gender
-        self.mother_email = mother_email
-        self.session_id = session_id
+        self.fields = fields
 
     @property
     def school_id(self) -> int:
@@ -2029,6 +2800,29 @@ class OnlineApplication(Model):
         self._school_id = value
 
     @property
+    def type(self) -> str:
+        """
+        The type of form/application.
+
+        :return: str
+
+        """
+
+        return self._type
+
+    @type.setter
+    def type(self, value: str) -> None:
+        """
+        Set the type of form/application.
+
+        :param value: str, The
+        :return: None
+
+        """
+
+        self._type = value
+
+    @property
     def state(self) -> str:
         """
         The submission state of the online application.
@@ -2052,165 +2846,28 @@ class OnlineApplication(Model):
         self._state = value
 
     @property
-    def program(self) -> str:
+    def fields(self) -> List[Widget]:
         """
-        The program at the school that the child/family is applying to.
+        The question-answer responses provided by the respondent on the form.
 
-        :return: str
+        :return: List[Widget]
 
         """
 
-        return self._program
+        return self._fields
 
-    @program.setter
-    def program(self, value: str) -> None:
+    @fields.setter
+    def fields(self, value: List[Widget]) -> None:
         """
-        Set the program at the school that the child/family is applying to.
+        Set the question-answer responses provided by the respondent on the form.
 
-        :param value: str, The program at the school that the child/family is applying to.
+        :param value: List[Widget], The question-answer responses provided by the respondent
+            on the form.
         :return: None
 
         """
 
-        self._program = value
-
-    @property
-    def child_first_name(self) -> str:
-        """
-        The applicant child's first name.
-
-        :return: str
-
-        """
-
-        return self._child_first_name
-
-    @child_first_name.setter
-    def child_first_name(self, value: str) -> None:
-        """
-        Set the applicant child's first name.
-
-        :param value: str, The applicant child's first name.
-        :return: None
-
-        """
-
-        self._child_first_name = value
-
-    @property
-    def child_last_name(self) -> str:
-        """
-        The applicant child's last name.
-
-        :return: str
-
-        """
-
-        return self._child_last_name
-
-    @child_last_name.setter
-    def child_last_name(self, value: str) -> None:
-        """
-        Set the applicant child's last name.
-
-        :param value: str, The applicant child's last name.
-        :return: None
-
-        """
-
-        self._child_last_name = value
-
-    @property
-    def child_birth_date(self) -> datetime.date:
-        """
-        The applicant child's birthdate.
-
-        :return: date
-
-        """
-
-        return self._child_birth_date
-
-    @child_birth_date.setter
-    def child_birth_date(self, value: Union[datetime.date, str]) -> None:
-        """
-        Set the applicant child's birthdate.
-
-        :param value: Union[date, str], The applicant child's birthdate.
-        :return: None
-
-        """
-
-        self._child_birth_date = Formatter.str_to_date(value=value)
-
-    @property
-    def child_gender(self) -> str:
-        """
-        The applicant child's gender.
-
-        :return: str
-
-        """
-
-        return self._child_gender
-
-    @child_gender.setter
-    def child_gender(self, value: str) -> None:
-        """
-        Set the applicant child's gender.
-
-        :param value: str, The applicant child's gender.
-        :return: None
-
-        """
-
-        self._child_gender = value
-
-    @property
-    def mother_email(self) -> str:
-        """
-        The mother of the applicant child's email address.
-
-        :return: str
-
-        """
-
-        return self._mother_email
-
-    @mother_email.setter
-    def mother_email(self, value: str) -> None:
-        """
-        Set the mother of the applicant child's email address.
-
-        :param value: str, The mother of the applicant child's email address.
-        :return: None
-
-        """
-
-        self._mother_email = value
-
-    @property
-    def session_id(self) -> int:
-        """
-        The session that the child/family is applying to.
-
-        :return: int
-
-        """
-
-        return self._session_id
-
-    @session_id.setter
-    def session_id(self, value: int) -> None:
-        """
-        Set the session that the child/family is applying to.
-
-        :param value: str, The session that the child/family is applying to.
-        :return: None
-
-        """
-
-        self._session_id = value
+        self._fields = [] if value is None else value
 
 
 class School(Model):
@@ -2572,7 +3229,10 @@ class User(Model):
             use has access to.
         default_classroom_id (`int`): The id of the classroom associated with the
             user by default (e.g. The id of the teacher's classroom).
-        address (`str`): The street address of the user.
+        street (`str`): The street address of the user.
+        postal_code (`str`): The postal code of the area the user is in.
+        city (`str`): The city that the user is located in.
+        state_province (`str`): The state/province that the user is located in.
         home_number (`str`): The home phone number of the user.
         mobile_number (`str`): The mobile phone number of the user.
         work_number (`str`): The work phone number of the user.
@@ -2590,7 +3250,10 @@ class User(Model):
             roles: Optional[List[str]] = None,
             accessible_classroom_ids: Optional[List[int]] = None,
             default_classroom_id: Optional[int] = None,
-            address: Optional[str] = None,
+            street: Optional[str] = None,
+            postal_code: Optional[str] = None,
+            city: Optional[str] = None,
+            state_province: Optional[str] = None,
             home_number: Optional[str] = None,
             mobile_number: Optional[str] = None,
             work_number: Optional[str] = None) -> None:
@@ -2608,7 +3271,10 @@ class User(Model):
             use has access to.
         :param default_classroom_id: Optional[int], The id of the classroom associated with the
             user by default (e.g. The id of the teacher's classroom).
-        :param address: Optional[str], The street address of the user.
+        :param street: Optional[str], The street address of the user.
+        :param postal_code: Optional[str], The postal code of the area the user is in.
+        :param city: Optional[str], The city that the user is located in.
+        :param state_province: Optional[str], The state/province that the user is located in.
         :param home_number: Optional[str], The home phone number of the user.
         :param mobile_number: Optional[str], The mobile phone number of the user.
         :param work_number: Optional[str], The work phone number of the user.
@@ -2625,7 +3291,10 @@ class User(Model):
         self.roles = roles
         self.accessible_classroom_ids = accessible_classroom_ids
         self.default_classroom_id = default_classroom_id
-        self.address = address
+        self.street = street
+        self.city = city
+        self.postal_code = postal_code
+        self.state_province = state_province
         self.home_number = home_number
         self.mobile_number = mobile_number
         self.work_number = work_number
@@ -2816,7 +3485,7 @@ class User(Model):
         self._default_classroom_id = value
 
     @property
-    def address(self) -> str:
+    def street(self) -> str:
         """
         The street address of the user.
 
@@ -2824,10 +3493,10 @@ class User(Model):
 
         """
 
-        return self._address
+        return self._street
 
-    @address.setter
-    def address(self, value: str) -> None:
+    @street.setter
+    def street(self, value: str) -> None:
         """
         Set the street address of the user.
 
@@ -2836,7 +3505,76 @@ class User(Model):
 
         """
 
-        self._address = value
+        self._street = value
+
+    @property
+    def city(self) -> str:
+        """
+        The city that the user is located in.
+
+        :return: str
+
+        """
+
+        return self._city
+
+    @city.setter
+    def city(self, value: str) -> None:
+        """
+        Set the city that the user is located in.
+
+        :param value: str, The city that the user is located in.
+        :return: None
+
+        """
+
+        self._city = value
+
+    @property
+    def postal_code(self) -> str:
+        """
+        The postal code of the area the user is in.
+
+        :return: str
+
+        """
+
+        return self._postal_code
+
+    @postal_code.setter
+    def postal_code(self, value: str) -> None:
+        """
+        Set the postal code of the area the user is in.
+
+        :param value: str, The postal code of the area the user is in.
+        :return: None
+
+        """
+
+        self._postal_code = value
+
+    @property
+    def state_province(self) -> str:
+        """
+        The state/province that the user is located in.
+
+        :return: str
+
+        """
+
+        return self._state_province
+
+    @state_province.setter
+    def state_province(self, value: str) -> None:
+        """
+        Set the state/province that the user is located in.
+
+        :param value: str, The state/province that the user is located in.
+        :return: None
+
+        """
+
+        self._state_province = value
 
     @property
     def home_number(self) -> str:
@@ -2906,3 +3644,171 @@ class User(Model):
         """
 
         self._work_number = value
+
+
+class Auth(JSONModel):
+    """
+    Auth Model Class
+
+    This class represents the response object received from an authentication request to
+    the Transparent Classroom's auth endpoint.
+
+    Attributes:
+        school_id (`int`): The id of the school that the use is authenticated to access.
+        api_token (`str`): The authentication token received from Transparent Classroom
+            to use when submitting API requests to TC.
+        push_tokens (`List`): Tokens to use for sending push notifications.
+        push_enabled (`bool`): Flag indicating whether push notifications are enabled
+            for the specified auth setting.
+        user (`User`): The user associated with the authentication request.
+
+    """
+
+    def __init__(
+            self,
+            school_id: Optional[int] = None,
+            api_token: Optional[str] = None,
+            push_tokens: Optional[List] = None,
+            push_enabled: Optional[bool] = None,
+            user: Optional[User] = None) -> None:
+        """
+        Auth Model Constructor
+
+        :param school_id: Optional[int], The id of the school that the use is authenticated
+            to access.
+        :param api_token: Optional[str], The authentication token received from Transparent
+            Classroom to use when submitting API requests to TC.
+        :param push_tokens: Optional[List], Tokens to use for sending push notifications.
+        :param push_enabled: Optional[bool], Flag indicating whether push notifications are
+            enabled for the specified auth setting.
+        :param user: Optional[User], The user associated with the authentication request.
+        :return: None
+
+        """
+
+        self.school_id = school_id
+        self.api_token = api_token
+        self.push_tokens = push_tokens
+        self.push_enabled = push_enabled
+        self.user = user
+
+    @property
+    def school_id(self) -> int:
+        """
+        The id of the school that the use is authenticated to access.
+
+        :return: int
+
+        """
+
+        return self._school_id
+
+    @school_id.setter
+    def school_id(self, value: int) -> None:
+        """
+        Set the id of the school that the use is authenticated to access.
+
+        :param value: int, The id of the school that the use is authenticated to access.
+        :return: None
+
+        """
+
+        self._school_id = value
+
+    @property
+    def api_token(self) -> str:
+        """
+        The authentication token received from Transparent Classroom to use when submitting
+        API requests to TC.
+
+        :return: str
+
+        """
+
+        return self._api_token
+
+    @api_token.setter
+    def api_token(self, value: str) -> None:
+        """
+        Set the authentication token received from Transparent Classroom to use when
+        submitting API requests to TC.
+
+        :param value: str, The authentication token received from Transparent Classroom to
+            use when submitting API requests to TC.
+        :return: None
+
+        """
+
+        self._api_token = value
+
+    @property
+    def push_tokens(self) -> List:
+        """
+        The tokens to use for sending push notifications.
+
+        :return: List
+
+        """
+
+        return self._push_tokens
+
+    @push_tokens.setter
+    def push_tokens(self, value: List) -> None:
+        """
+        Set the tokens to use for sending push notifications.
+
+        :param value: List, The tokens to use for sending push notifications.
+        :return: None
+
+        """
+
+        self._push_tokens = value
+
+    @property
+    def push_enabled(self) -> bool:
+        """
+        The flag indicating whether push notifications are enabled for the specified
+        auth setting.
+
+        :return: bool
+
+        """
+
+        return self._push_enabled
+
+    @push_enabled.setter
+    def push_enabled(self, value: bool) -> None:
+        """
+        Set the flag indicating whether push notifications are enabled for the specified
+        auth setting.
+
+        :param value: bool, The flag indicating whether push notifications are enabled
+            for the specified auth setting.
+        :return: None
+
+        """
+
+        self._push_enabled = value
+
+    @property
+    def user(self) -> User:
+        """
+        The user associated with the authentication request.
+
+        :return: User
+
+        """
+
+        return self._user
+
+    @user.setter
+    def user(self, value: User) -> None:
+        """
+        Set the user associated with the authentication request.
+
+        :param value: User, The user associated with the authentication request.
+        :return: None
+
+        """
+
+        self._user = value

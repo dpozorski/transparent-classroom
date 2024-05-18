@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Union
 from datetime import date, datetime
 
 
@@ -24,10 +24,10 @@ class Formatter(object):
         """
 
         if value is not None:
-            if isinstance(value, date):
-                return Formatter.date_to_str(value=value)
-            elif isinstance(value, datetime):
+            if isinstance(value, datetime):
                 return Formatter.datetime_to_str(value=value)
+            elif isinstance(value, date):
+                return Formatter.date_to_str(value=value)
             elif isinstance(value, dict):
                 return Formatter.jsonify(data=value)
             elif isinstance(value, list):
@@ -57,11 +57,11 @@ class Formatter(object):
         return data
 
     @staticmethod
-    def date_to_str(value: date) -> str:
+    def date_to_str(value: Union[str, date]) -> str:
         """
         Convert the date to the Transparent Classsroom string format.
 
-        :param value: date, The date to convert.
+        :param value: Union[str, date], The date to convert.
         :return: str
 
         """
@@ -70,34 +70,34 @@ class Formatter(object):
             if isinstance(value, date):
                 return date.strftime(value, "%Y-%m-%d")
             elif isinstance(value, str):
-                return value
+                return Formatter.date_to_str(value=Formatter.str_to_date(value=value))
             else:
                 raise ValueError(f"The provided value {value} is not date-like.")
 
     @staticmethod
-    def datetime_to_str(value: datetime) -> str:
+    def datetime_to_str(value: Union[str, datetime]) -> str:
         """
         Convert the datetime to the Transparent Classsroom string format.
 
-        :param value: datetime, The datetime to convert.
+        :param value: Union[str, datetime], The datetime to convert.
         :return: str
 
         """
 
         if value is not None:
             if isinstance(value, datetime):
-                return datetime.strftime(value, "%Y-%m-%d %H:%M:%S.%f-%z")
+                return datetime.strftime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
             elif isinstance(value, str):
-                return value
+                return Formatter.datetime_to_str(value=Formatter.str_to_datetime(value=value))
             else:
                 raise ValueError(f"The provided value {value} is not datetime-like.")
 
     @staticmethod
-    def str_to_date(value: str) -> date:
+    def str_to_date(value: Union[str, date]) -> date:
         """
         Convert the string to a date object.
 
-        :param value: str, The string to convert.
+        :param value: Union[str, date], The string to convert.
         :return: date
 
         """
@@ -111,11 +111,11 @@ class Formatter(object):
                 raise ValueError(f"The provided value {value} is not date-like.")
 
     @staticmethod
-    def str_to_datetime(value: str) -> datetime:
+    def str_to_datetime(value: Union[str, datetime]) -> datetime:
         """
         Convert the string to a datetime object.
 
-        :param value: str, The string to convert.
+        :param value: Union[str, datetime], The string to convert.
         :return: datetime
 
         """
@@ -124,6 +124,9 @@ class Formatter(object):
             if isinstance(value, datetime):
                 return value
             elif isinstance(value, str):
-                return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f-%z")
+                try:
+                    return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
+                except ValueError as e:
+                    return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S%z")
             else:
                 raise ValueError(f"The provided value {value} is not datetime-like.")

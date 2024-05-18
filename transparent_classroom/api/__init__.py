@@ -1,5 +1,4 @@
 from typing import List, Union, Optional
-from transparent_classroom.api.requests import Request
 from transparent_classroom.api.entry_points import EntryPoint
 from transparent_classroom.api.enums import EndpointBehavior, ModelType
 from transparent_classroom.api.exceptions import EntrypointNotFoundException

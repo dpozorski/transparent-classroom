@@ -112,7 +112,7 @@ class Field(NamedAPIAttribute):
             name: str,
             value: Optional[Any] = None,
             is_required: Optional[bool] = False,
-            validator: Optional[Validator] = Validator()) -> None:
+            validator: Optional[Validator] = None) -> None:
         """
         Construct the fields and it's assignment.
 
@@ -126,8 +126,23 @@ class Field(NamedAPIAttribute):
 
         super().__init__(name=name)
         self.value = value
-        self._validator = validator
+        self.validator = validator
         self.is_required = is_required
+
+    def __copy__(self) -> 'Field':
+        """
+        Copy the field object.
+
+        :return: Field
+
+        """
+
+        return Field(
+            name=self.name,
+            value=self.value,
+            validator=self.validator.__copy__(),
+            is_required=self.is_required
+        )
 
     def __eq__(self, other: 'Field') -> bool:
         """
@@ -141,7 +156,9 @@ class Field(NamedAPIAttribute):
         if (other is None) or (not isinstance(other, Field)):
             return False
 
-        return (other.name == self.name) and (other.value == self.value) and (str(self) == str(other))
+        return (other.name == self.name) \
+            and (other.value == self.value) \
+            and (self.validator == other.validator)
 
     def __str__(self) -> str:
         """
@@ -151,7 +168,7 @@ class Field(NamedAPIAttribute):
 
         """
 
-        return f"Field `{self.name}`={self.value}"
+        return f"Field `{self.name}` = {self.value}"
 
     def __repr__(self) -> str:
         """
@@ -172,6 +189,17 @@ class Field(NamedAPIAttribute):
         """
 
         return hash(str(self))
+
+    def is_valid(self, strict: bool = False) -> bool:
+        """
+        Return whether the field assignment is valid.
+
+        :param strict: bool, Flag indicating whether to perform strict validation.
+        :return: bool
+
+        """
+
+        return self.validator.is_valid(value=self.value, strict=strict)
 
     @property
     def name(self) -> str:
@@ -241,7 +269,7 @@ class Field(NamedAPIAttribute):
 
         """
 
-        self._validator = value
+        self._validator = Validator() if value is None else value
 
     @property
     def is_required(self) -> bool:
@@ -367,12 +395,13 @@ class BooleanField(Field):
 
     """
 
-    def __init__(self, name: str, value: Optional[bool] = None, is_required: Optional[bool] = False) -> None:
+    def __init__(self, name: str, value: Optional[str] = None, is_required: Optional[bool] = False) -> None:
         """
         Construct the fields and it's assignment.
 
         :param name: str, The name of the variable.
-        :param value: Optional[bool], The value bound to this variable.
+        :param value: Optional[str], The value bound to this variable. Boolean parameters
+            on the API are strings ("true", "false").
         :param is_required: Optional[bool], Flag indicating whether the field is required.
         :return: None
 
@@ -465,7 +494,7 @@ class DateTimeField(Field):
             self,
             name: str,
             value: Optional[datetime] = None,
-            format: Optional[str] ="%Y-%m-%d %H:%M:%S.%f-%z",
+            format: Optional[str] ="%Y-%m-%dT%H:%M:%S.%f%z",
             is_required: Optional[bool] = False) -> None:
         """
         Construct the fields and it's assignment.
@@ -527,7 +556,7 @@ class SelectField(Field):
             self,
             name: str,
             options: List,
-            value: Optional[str] = None,
+            value: Optional[Any] = None,
             is_required: Optional[bool] = False) -> None:
         """
         Construct the fields and it's assignment.
@@ -535,7 +564,7 @@ class SelectField(Field):
         :param name: str, The name of the variable.
         :param options: List, A list of options that the provided value can be
             drawn from. Other values will be invalid.
-        :param value: Optional[str], The value bound to this variable.
+        :param value: Optional[Any], The value bound to this variable.
         :param is_required: Optional[bool], Flag indicating whether the field is required.
         :return: None
 
@@ -674,6 +703,28 @@ class InterfaceField(NamedAPIAttribute):
 
         return f"Interface Field `{self.name}`"
 
+    def __repr__(self) -> str:
+        """
+        The string representation of the variable.
+
+        :return: str
+
+        """
+
+        return str(self)
+
+    def __copy__(self) -> 'InterfaceField':
+        """
+        Copy the interface field object.
+
+        :return: InterfaceField
+
+        """
+
+        return InterfaceField(
+            base=self.base.__copy__()
+        )
+
     def is_valid(self, value: Any, strict: bool = False) -> bool:
         """
         Return whether the value assignment is valid.
@@ -698,7 +749,8 @@ class InterfaceField(NamedAPIAttribute):
 
         if self.is_valid(value=value, strict=True):
             field_type = type(self.base)
-            return field_type(name=self.name, value=value)
+            name = self.name.replace("_interface_field", "")
+            return field_type(name=name, value=value)
 
     @property
     def name(self) -> Any:
@@ -749,6 +801,39 @@ class FieldSet(Generic[T]):
 
         self._fields = {}
         self.add(fields=fields)
+
+    def __len__(self) -> int:
+        """
+        Get the number of items in the field set.
+
+        :return: int
+
+        """
+
+        return len(self._fields)
+
+    def __getitem__(self, arg: str) -> Union[None, T]:
+        """
+        Get the field.
+
+        :param arg: str, The name of the field to get.
+        :return: Union[None, T]
+
+        """
+
+        return self.get(name=arg)
+
+    def get(self, name: str) -> Union[None, T]:
+        """
+        Get the field.
+
+        :param name: str, The name of the field to get.
+        :return: Union[None, T]
+
+        """
+
+        if (name is not None) and (name in self._fields.keys()):
+            return self._fields[name]
 
     def _add(self, field: T) -> None:
         """
@@ -811,7 +896,7 @@ class FieldSet(Generic[T]):
             fields = fields if isinstance(fields, list) else [fields]
 
             for f in fields:
-                if isinstance(f, Field) or isinstance(f, str):
+                if isinstance(f, NamedAPIAttribute) or isinstance(f, str):
                     self._remove(field=f)
 
     def clear(self) -> None:
@@ -847,7 +932,7 @@ class FieldSet(Generic[T]):
 
         """
 
-        return [field.copy() for field in self._fields.values()]
+        return [field.__copy__() for field in self._fields.values()]
 
 
 class InterfaceFieldSet(FieldSet[InterfaceField]):

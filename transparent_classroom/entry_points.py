@@ -83,12 +83,12 @@ GET_LESSON_SET_ENTRY_POINT = EntryPoint(
 
 # Entry point(s) for interacting with the level object
 LIST_LEVELS_ENTRY_POINT = EntryPoint(
-    name="Get Levels Entry Point",
+    name="List Levels Entry Point",
     route=routes.LIST_LEVELS_ROUTE,
     interface=interfaces.LIST_LEVELS_INTERFACE
 )
 LIST_FILTERED_LEVELS_ENTRY_POINT = EntryPoint(
-    name="Get Filtered Levels Entry Point",
+    name="List Filtered Levels Entry Point",
     route=routes.LIST_FILTERED_LEVELS_ROUTE,
     interface=interfaces.LIST_FILTERED_LEVELS_INTERFACE
 )

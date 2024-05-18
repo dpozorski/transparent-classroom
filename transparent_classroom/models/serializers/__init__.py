@@ -168,13 +168,8 @@ class OnlineApplicationSerializer(Serializer[models.OnlineApplication]):
             mapping={
                 "id": "id",
                 "school_id": "school_id",
+                "type": "type",
                 "state": "state",
-                "program": ["fields", "program"],
-                "child_first_name": ["fields", "child_name.first"],
-                "child_last_name": ["fields", "child_name.last"],
-                "child_birth_date": ["fields", "child_birth_date"],
-                "child_gender": ["fields", "child_gender"],
-                "mother_email": ["fields", "mother_email"],
-                "session_id": ["fields", "session_id"]
+                "fields": "fields"
             }
         )
