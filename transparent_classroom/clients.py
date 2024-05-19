@@ -100,7 +100,7 @@ class Client(object):
         response = self.__submit(**parameters)
         data = response.json()
 
-        if "errors" in data.keys():
+        if hasattr(data, "keys") and "errors" in data.keys():
             raise EndpointException(**data["errors"][0])
 
         return deserializer.__getattribute__(parse_mode)(data=data)
@@ -305,9 +305,6 @@ class Client(object):
     def get_child(self, child_id: int, as_of: Optional[Union[str, date]] = None) -> models.Child:
         """
         Get the specified child data.
-
-        TODO:
-            - Odd behavior w/ classroom ids (session_id should be passed somewhere?)
 
         :param child_id: int, The id of the child to get the data for.
         :param as_of: Optional[Union[str, date]], If specified, shows child fields as
@@ -697,7 +694,7 @@ class Client(object):
             deserializer=deserializers.UserDeserializer()
         )
 
-    def get_users(self, classroom_id: Optional[int] = None, roles: Optional[List] = None) -> List[models.User]:
+    def get_users(self, classroom_id: Optional[int] = None, roles: Optional[List[str]] = None) -> List[models.User]:
         """
         Get all the users in Transparent Classroom (potentially filtered using the available
         method parameters). Listing users does not populate additional user data fields
@@ -705,7 +702,7 @@ class Client(object):
 
         :param classroom_id: Optional[int], Filter the response to only include users that have
             an affiliation with the specified classroom id (required for teachers).
-        :param roles: Optional[List], Filter the response to include users matching any of the
+        :param roles: Optional[List[str]], Filter the response to include users matching any of the
             roles included in the request (teacher, parent, admin, billing_manager, family_member).
         :return: List[models.User]
 
