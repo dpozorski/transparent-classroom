@@ -26,8 +26,7 @@ client = Client(email='email', password='password')
 
 ## Requesting Data
 ```
-schools = client.get_schools()
-print(schools[0].to_dict())
+client.get_schools()[0].to_dict()
 
 {
     'id': 12345678, 
