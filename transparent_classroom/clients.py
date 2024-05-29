@@ -431,7 +431,7 @@ class Client(object):
                 "route_parameters": {}
             },
             deserializer=deserializers.EventDeserializer(),
-            paginated=False
+            paginated=True
         )
 
     def get_form(self, form_id: int) -> models.Form:
