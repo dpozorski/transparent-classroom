@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='transparent_classroom',
-    version='0.0.2',
+    version='0.0.3',
     author='Dylan Pozorski',
     author_email='dylanpozorski@gmail.com',
     url='https://github.com/dpozorski/transparent-classroom',
