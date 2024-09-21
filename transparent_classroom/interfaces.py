@@ -49,7 +49,7 @@ LIST_CHILDREN_INTERFACE = Interface(
     headers=_AUTH_HEADERS,
     parameters=[
         fields.InterfaceField(base=fields.ModelIdField(name="classroom_id")),
-        fields.InterfaceField(base=fields.ModelIdField(name="session_id")),
+        fields.InterfaceField(base=fields.StringField(name="session_id")),
         fields.InterfaceField(base=fields.BooleanField(name="only_current"))
     ]
 )

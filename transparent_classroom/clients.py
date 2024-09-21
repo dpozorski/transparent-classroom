@@ -329,7 +329,7 @@ class Client(object):
     def get_children(
             self,
             classroom_id: Optional[int] = None,
-            session_id: Optional[int] = None,
+            session_id: Optional[Union[int, str]] = None,
             only_current: Optional[bool] = False) -> List[models.Child]:
         """
         Get all the children (possibly filtered by classroom, session, and/or recency).
@@ -343,6 +343,14 @@ class Client(object):
         :return: List[models.Child]
 
         """
+
+        if isinstance(session_id, str):
+            session_id = session_id.lower()
+
+            if session_id.isdigit():
+                session_id = int(session_id)
+            elif session_id.lower() != 'all':
+                raise ValueError("Invalid session id (`{}`) provided.".format(session_id))
 
         return self.__batch(
             parameters={
