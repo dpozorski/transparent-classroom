@@ -347,10 +347,10 @@ class Client(object):
         if isinstance(session_id, str):
             session_id = session_id.lower()
 
-            if session_id.isdigit():
-                session_id = int(session_id)
-            elif session_id.lower() != 'all':
+            if (not session_id.isdigit()) and (session_id != 'all'):
                 raise ValueError("Invalid session id (`{}`) provided.".format(session_id))
+        else:
+            session_id = str(session_id)
 
         return self.__batch(
             parameters={
