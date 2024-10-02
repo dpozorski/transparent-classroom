@@ -2743,89 +2743,88 @@ class OnlineApplication(Model):
 
     Attributes:
         id (`int`): The Transparent Classroom object id of the online application.
-        school_id (`int`): The id of the school that the child/family is applying to.
-        type (`str`): The type of form/application.
-        state (`str`): The submission state of the online application.
-        fields (`Dict`): The question-answer responses provided by the respondent on the form.
+        first_name (`str`): The first name of the student associated with the application.
+        last_name (`str`): The last name of the student associated with the application.
+        state (`int`): The application form state.
+        created_at (`datetime.date`): The datetime that the application was created.
 
     """
 
     def __init__(
             self,
             id: Optional[int] = None,
-            school_id: Optional[int] = None,
-            type: Optional[str] = None,
+            first_name: Optional[str] = None,
+            last_name: Optional[str] = None,
             state: Optional[str] = None,
-            fields: Optional[List[Widget]] = None) -> None:
+            created_at: Optional[datetime.date] = None) -> None:
         """
         Online Application Constructor
 
         :param id: Optional[int], The Transparent Classroom object id of the online application.
-        :param school_id: Optional[int], The id of the school that the child/family is applying to.
-        :param type: Optional[str], The type of form/application.
-        :param state: Optional[str], The submission state of the online application.
-        :param fields: Optional[List[Widget]], The question-answer responses provided by the respondent on
-            the form.
+        :param first_name: Optional[str], The first name of the student associated with the application.
+        :param last_name: Optional[str], The last name of the student associated with the application.
+        :param state: Optional[int], The application form state.
+        :param created_at: Optional[datetime.date], The datetime that the application was created.
         :return: None
 
         """
 
         super().__init__(id=id)
-        self.school_id = school_id
-        self.type = type
+        self.first_name = first_name
+        self.last_name = last_name
         self.state = state
-        self.fields = fields
+        self.created_at = created_at
 
     @property
-    def school_id(self) -> int:
+    def first_name(self) -> str:
         """
-        The id of the school that the child/family is applying to.
-
-        :return: int
-
-        """
-
-        return self._school_id
-
-    @school_id.setter
-    def school_id(self, value: int) -> None:
-        """
-        Set the id of the school that the child/family is applying to.
-
-        :param value: str, The id of the school that the child/family is applying to.
-        :return: None
-
-        """
-
-        self._school_id = value
-
-    @property
-    def type(self) -> str:
-        """
-        The type of form/application.
+        The first name of the student associated with the application.
 
         :return: str
 
         """
 
-        return self._type
+        return self._first_name
 
-    @type.setter
-    def type(self, value: str) -> None:
+    @first_name.setter
+    def first_name(self, value: str) -> None:
         """
-        Set the type of form/application.
+        Set the first name of the student associated with the application.
 
-        :param value: str, The
+        :param value: str, The first name of the student associated with the application.
         :return: None
 
         """
 
-        self._type = value
+        self._first_name = value
+
+    @property
+    def last_name(self) -> str:
+        """
+        The last name of the student associated with the application.
+
+        :return: str
+
+        """
+
+        return self._last_name
+
+    @last_name.setter
+    def last_name(self, value: str) -> None:
+        """
+        Set the last name of the student associated with the application.
+
+        :param value: str, The last name of the student associated with the application.
+        :return: None
+
+        """
+
+        self._last_name = value
 
     @property
     def state(self) -> str:
         """
-        The submission state of the online application.
+        The application form state.
 
         :return: str
 
@@ -2836,9 +2835,9 @@ class OnlineApplication(Model):
     @state.setter
     def state(self, value: str) -> None:
         """
-        Set the submission state of the online application.
+        Set the application form state.
 
-        :param value: str, The submission state of the online application.
+        :param value: str, The application form state.
         :return: None
 
         """
@@ -2846,28 +2845,27 @@ class OnlineApplication(Model):
         self._state = value
 
     @property
-    def fields(self) -> List[Widget]:
+    def created_at(self) -> datetime.date:
         """
-        The question-answer responses provided by the respondent on the form.
+        The datetime that the application was created.
 
-        :return: List[Widget]
+        :return: datetime.date
 
         """
 
-        return self._fields
+        return self._created_at
 
-    @fields.setter
-    def fields(self, value: List[Widget]) -> None:
+    @created_at.setter
+    def created_at(self, value: datetime.date) -> None:
         """
-        Set the question-answer responses provided by the respondent on the form.
+        Set the datetime that the application was created.
 
-        :param value: List[Widget], The question-answer responses provided by the respondent
-            on the form.
+        :param value: datetime.date, The datetime that the application was created.
         :return: None
 
         """
 
-        self._fields = [] if value is None else value
+        self._created_at = value
 
 
 class School(Model):

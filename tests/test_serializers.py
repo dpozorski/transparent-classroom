@@ -1,6 +1,6 @@
 import operator
 import unittest
-from datetime import date
+from datetime import date, datetime
 from functools import reduce
 from transparent_classroom.models import Child, OnlineApplication, Model
 from transparent_classroom.models import serializers, deserializers
@@ -139,30 +139,12 @@ class TestOnlineApplicationSerializer(TestSerializer):
 
         """
 
-        fields = []
-        field_data = {
-            "program": "Elementary",
-            "child_first_name": "Hello",
-            "child_last_name": "World",
-            "child_birth_date": date.today(),
-            "child_gender": "F",
-            "mother_email": "hello@world.com",
-            "session_id": 1
-        }
-
-        for name in field_data.keys():
-            fields.append({
-                'name': name,
-                'value': field_data[name]
-            })
-
-        widgets = deserializers.WidgetDeserializer().batch(data=fields)
         self.model = OnlineApplication(
             id=1,
-            school_id=1,
-            type="form",
-            state="Accepted",
-            fields=widgets
+            first_name="John",
+            last_name="Doe",
+            state="accepted",
+            created_at=datetime.today()
         )
         self.serializer = serializers.OnlineApplicationSerializer()
 

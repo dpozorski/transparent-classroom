@@ -419,18 +419,10 @@ class TestOnlineApplicationModel(TestJSONModel):
         self.cls = models.OnlineApplication
         self.data = {
             "id": 1,
-            "school_id": 1,
-            "type": "form",
+            "first_name": "John",
+            "last_name": "Doe",
             "state": "accepted",
-            "fields": {
-                "program": "Elementary",
-                "child_first_name": "Hello",
-                "child_last_name": "World",
-                "child_birth_date": datetime.today().date(),
-                "child_gender": "M",
-                "mother_email": "hello@world.com",
-                "session_id": 1
-            }
+            "created_at": "2016-02-16T09:53:44.684-08:00"
         }
 
 

@@ -167,9 +167,9 @@ class OnlineApplicationSerializer(Serializer[models.OnlineApplication]):
         super().__init__(
             mapping={
                 "id": "id",
-                "school_id": "school_id",
-                "type": "type",
+                "first_name": "first_name",
+                "last_name": "last_name",
                 "state": "state",
-                "fields": "fields"
+                "created_at": "created_at"
             }
         )
