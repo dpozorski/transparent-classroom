@@ -508,12 +508,35 @@ class OnlineApplicationDeserializer(Deserializer[models.OnlineApplication]):
 
         super().__init__(cls=models.OnlineApplication)
 
-    def deserialize(self, data: Dict) -> models.OnlineApplication:
+
+class OnlineApplicationDetailDeserializer(Deserializer[models.OnlineApplicationDetail]):
+    """
+    Online Application Detail Deserializer Class
+
+    This class will deserialize the object data from an API response and convert
+    it into online application objects.
+
+    Attributes:
+
+
+    """
+
+    def __init__(self) -> None:
         """
-        Method for deserializing the provided object data into a conference report object.
+        Online Application Detail Deserializer Constructor
+
+        :return: None
+
+        """
+
+        super().__init__(cls=models.OnlineApplicationDetail)
+
+    def deserialize(self, data: Dict) -> models.OnlineApplicationDetail:
+        """
+        Method for deserializing the provided object data into a online application detail object.
 
         :param data: Dict, The object to serialize.
-        :return: models.OnlineApplication
+        :return: models.OnlineApplicationDetail
 
         """
 

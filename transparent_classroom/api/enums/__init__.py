@@ -79,6 +79,12 @@ class ModelType(Enum):
     ONLINE_APPLICATIONS = "online_applications"
 
     """
+    The model used for the details of an online application to the school.
+    
+    """
+    ONLINE_APPLICATION_DETAILS = "online_application_details"
+
+    """
     The model used for schools within a network of schools.
     
     """

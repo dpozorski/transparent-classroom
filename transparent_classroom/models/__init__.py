@@ -2868,6 +2868,132 @@ class OnlineApplication(Model):
         self._created_at = value
 
 
+class OnlineApplicationDetail(Model):
+    """
+    Online Application Detail Model Class
+
+    Attributes:
+        school_id (`int`): The id of the school that the application is directed towards.
+        state (`str`): The application form state.
+        fields (`Dict`): The fields composing the application.
+
+    """
+
+    def __init__(
+            self,
+            online_application_id: Optional[int] = None,
+            school_id: Optional[int] = None,
+            state: Optional[str] = None,
+            fields: Optional[Dict] = None) -> None:
+        """
+        Online Application Detail Constructor
+
+        :param online_application_id: Optional[int], The Transparent Classroom object id of the online application.
+        :param school_id: Optional[int], The id of the school that the application is directed towards.
+        :param state: Optional[str], The application form state.
+        :param fields: Optional[Dict], The fields composing the application.
+        :return: None
+
+        """
+
+        super().__init__(id=online_application_id)
+        self.school_id = school_id
+        self.state = state
+        self.fields = fields
+
+    @property
+    def online_application_id(self) -> int:
+        """
+        The id of the online application.
+
+        :return: int
+
+        """
+
+        return self.id
+
+    @online_application_id.setter
+    def online_application_id(self, value: int) -> None:
+        """
+        Set the id of the online application.
+
+        :param value: int, The id of the online application.
+        :return: None
+
+        """
+
+        self.id = value
+
+    @property
+    def school_id(self) -> int:
+        """
+        The id of the school that the application was submitted to.
+
+        :return: int
+
+        """
+
+        return self._school_id
+
+    @school_id.setter
+    def school_id(self, value: int) -> None:
+        """
+        Set the id of the school that the application was submitted to.
+
+        :param value: int, The id of the school that the application was submitted to.
+        :return: None
+
+        """
+
+        self._school_id = value
+
+    @property
+    def state(self) -> str:
+        """
+        The application state ('submitted', 'accepted', etc.).
+
+        :return: str
+
+        """
+
+        return self._state
+
+    @state.setter
+    def state(self, value: str) -> None:
+        """
+        Set the application state ('submitted', 'accepted', etc.)
+
+        :param value: str, The application state ('submitted', 'accepted', etc.)
+        :return: None
+
+        """
+
+        self._state = value
+
+    @property
+    def fields(self) -> Dict:
+        """
+        The fields of the application.
+
+        :return: Dict
+
+        """
+
+        return self._fields
+
+    @fields.setter
+    def fields(self, value: Dict) -> None:
+        """
+        Set the fields of the application.
+
+        :param value: Dict, The fields of the application.
+        :return: None
+
+        """
+
+        self._fields = value
+
+
 class School(Model):
     """
     School Model Class

@@ -595,26 +595,6 @@ class Client(object):
             deserializer=deserializers.LevelDeserializer()
         )
 
-    def get_online_application(self, online_application_id: int) -> models.OnlineApplication:
-        """
-        Get the form data of the specified online application.
-
-        :param online_application_id: int, The id of the online application to get.
-        :return: models.OnlineApplication
-
-        """
-
-        return self.__get(
-            parameters={
-                "model_type": ModelType.ONLINE_APPLICATIONS,
-                "parameters": {},
-                "route_parameters": {
-                    "object_id": online_application_id
-                }
-            },
-            deserializer=deserializers.OnlineApplicationDeserializer()
-        )
-
     def get_online_applications(
             self,
             after: Optional[Union[str, date, datetime]] = None) -> List[models.OnlineApplication]:
@@ -643,6 +623,26 @@ class Client(object):
                 "route_parameters": {}
             },
             deserializer=deserializers.OnlineApplicationDeserializer()
+        )
+
+    def get_online_application_details(self, online_application_id: Union[int, str]) -> Union[models.OnlineApplicationDetail, List[models.OnlineApplicationDetail]]:
+        """
+        Get the form data of the specified online application.
+
+        :param online_application_id: int, The id of the online application to get.
+        :return: Union[models.OnlineApplicationDetail, List[models.OnlineApplicationDetail]]
+
+        """
+
+        return self.__get(
+            parameters={
+                "model_type": ModelType.ONLINE_APPLICATIONS,
+                "parameters": {},
+                "route_parameters": {
+                    "object_id": online_application_id
+                }
+            },
+            deserializer=deserializers.OnlineApplicationDetailDeserializer()
         )
 
     def get_schools(self) -> List[models.School]:
